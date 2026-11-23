@@ -1,0 +1,49 @@
+<div class="modal" id="modal-atender-{{ item.id }}">
+    <div class="modal-fundo" data-modal-fechar></div>
+    <div class="modal-caixa modal-larga">
+        <form method="post" action="{% url 'triagem:atender' item.id %}">
+            {% csrf_token %}
+            <div class="modal-topo">
+                <h4>Atender {{ item.nome }}</h4>
+                <button class="modal-fechar" type="button" data-modal-fechar>
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="modal-corpo">
+                <div class="resumo-chips mb-2">
+                    <span class="chip"><span class="material-symbols-outlined">confirmation_number</span> Nº {{ item.numero }}</span>
+                    <span class="chip"><span class="material-symbols-outlined">schedule</span> Entrada {{ item.hora_entrada|time:'H:i' }}</span>
+                </div>
+                <div class="campo">
+                    <label for="tipo-{{ item.id }}">Tipo de atendimento <span class="obrigatorio">*</span></label>
+                    <select name="tipo_atendimento" id="tipo-{{ item.id }}" class="form-select" required>
+                        {% for valor, rotulo in tipos_atendimento %}
+                        <option value="{{ valor }}"{% if valor == item.tipo_padrao %} selected{% endif %}>{{ rotulo }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <fieldset class="campo campo-grupo">
+                    <legend>Motivos do atendimento</legend>
+                    <div class="opcoes-marcar">
+                        {% for motivo in motivos %}
+                        <label class="opcao-marcar">
+                            <input type="checkbox" name="motivo" value="{{ motivo }}">
+                            <span>{{ motivo }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </fieldset>
+                <div class="campo">
+                    <label for="obs-{{ item.id }}">Observações / Pendências</label>
+                    <textarea name="observacoes" id="obs-{{ item.id }}" class="form-control" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-rodape">
+                <button class="btn btn-secundario" type="button" data-modal-fechar>Cancelar</button>
+                <button class="btn btn-verde" type="submit">
+                    <span class="material-symbols-outlined">check_circle</span> Confirmar atendimento
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

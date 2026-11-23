@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block titulo %}Histórico Administrativo - CRAS{% endblock %}
+{% block conteudo %}
+<div class="topo-pagina">
+    <div>
+        <h1>Atendimentos Administrativos</h1>
+        <p class="topo-sub">
+            <span class="material-symbols-outlined">history</span>
+            {{ page.paginator.count }} registros
+        </p>
+    </div>
+</div>
+<form method="get" class="filtros">
+    <div class="campo busca-input">
+        <input type="text" name="q" class="form-control" placeholder="Buscar por nome, CPF ou motivo…" value="{{ q }}">
+    </div>
+    <button class="btn btn-primario" type="submit">
+        <span class="material-symbols-outlined">search</span> Buscar
+    </button>
+    <a class="btn btn-secundario" href="{% url 'administrativo:lista' %}">Limpar</a>
+</form>
+<div class="card">
+    <div class="tabela-wrap">
+        <table class="tabela">
+            <thead>
+                <tr><th>Nome</th><th>Data nasc.</th><th>CPF</th><th>Bairro</th><th>Telefone</th><th>Data atendimento</th><th>Motivo</th><th>Servidor</th></tr>
+            </thead>
+            <tbody>
+                {% for r in page %}
+                <tr>
+                    <td><strong>{{ r.nome }}</strong></td>
+                    <td>{{ r.data_nasc|date:'d/m/Y'|default:'—' }}</td>
+                    <td>{{ r.cpf|default:'—' }}</td>
+                    <td>{{ r.bairro|default:'—' }}</td>
+                    <td>{{ r.telefone|default:'—' }}</td>
+                    <td>{{ r.data_atendimento|date:'d/m/Y'|default:'—' }}</td>
+                    <td>
+                        {% if r.motivo == 'PSICOSOCIAL' %}
+                        <span class="badge-pill badge-azul">{{ r.motivo }}</span>
+                        {% elif r.motivo %}
+                        <span class="badge-pill badge-neutro">{{ r.motivo }}</span>
+                        {% else %}—{% endif %}
+                    </td>
+                    <td>{{ r.servidor|default:'—' }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8"><div class="vazio"><span class="material-symbols-outlined">search_off</span>Nenhum resultado encontrado.</div></td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<nav class="paginacao">
+    <span class="info">Página {{ page.number }} de {{ page.paginator.num_pages }}</span>
+    {% if page.has_previous %}
+    <a class="pagina-link" href="?q={{ q }}&page={{ page.previous_page_number }}">Anterior</a>
+    {% endif %}
+    {% if page.has_next %}
+    <a class="pagina-link" href="?q={{ q }}&page={{ page.next_page_number }}">Próxima</a>
+    {% endif %}
+</nav>
+{% endblock %}

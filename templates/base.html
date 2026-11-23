@@ -1,0 +1,133 @@
+{% load static %}
+{% load cras_extras %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block titulo %}CRAS{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Plus+Jakarta+Sans:wght@100..900&display=swap" rel="stylesheet">
+    <link href="{% static_v 'cras/css/tema.css' %}" rel="stylesheet">
+</head>
+<body>
+{% if user.is_authenticated %}
+<aside class="app-sidebar">
+    <div class="sidebar-brand">
+        <div class="logo"><span class="material-symbols-outlined">volunteer_activism</span></div>
+        <div>
+            <h1>CRAS</h1>
+            <small>Gestão de Atendimentos</small>
+        </div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="sidebar-grupo">Operação</div>
+        <a class="sidebar-link {% if request.resolver_match.view_name == 'inicio' %}ativo{% endif %}" href="{% url 'inicio' %}">
+            <span class="material-symbols-outlined">dashboard</span> Painel
+        </a>
+        <a class="sidebar-link {% if request.resolver_match.view_name|startswith:'triagem' %}ativo{% endif %}" href="{% url 'triagem:filas' %}">
+            <span class="material-symbols-outlined">groups</span> Filas
+        </a>
+        <a class="sidebar-link" href="{% url 'triagem:registrar' %}">
+            <span class="material-symbols-outlined">person_add</span> Nova Triagem
+        </a>
+        <a class="sidebar-link" href="{% url 'triagem:controle' %}">
+            <span class="material-symbols-outlined">fact_check</span> Controle Diário
+        </a>
+        <div class="sidebar-grupo">Gestão</div>
+        <a class="sidebar-link {% if request.resolver_match.view_name|startswith:'atendimentos' %}ativo{% endif %}" href="{% url 'atendimentos:lista' %}">
+            <span class="material-symbols-outlined">description</span> Atendimentos
+        </a>
+        <a class="sidebar-link {% if request.resolver_match.view_name|startswith:'certidoes' %}ativo{% endif %}" href="{% url 'certidoes:lista' %}">
+            <span class="material-symbols-outlined">contract</span> Certidões
+        </a>
+        <a class="sidebar-link {% if request.resolver_match.view_name|startswith:'dsf' %}ativo{% endif %}" href="{% url 'dsf:lista' %}">
+            <span class="material-symbols-outlined">task</span> DSF Concluído
+        </a>
+        <a class="sidebar-link {% if request.resolver_match.view_name|startswith:'tap' %}ativo{% endif %}" href="{% url 'tap:mensal' %}">
+            <span class="material-symbols-outlined">calendar_month</span> TAP Mensal
+        </a>
+        <a class="sidebar-link {% if request.resolver_match.view_name|startswith:'administrativo' %}ativo{% endif %}" href="{% url 'administrativo:lista' %}">
+            <span class="material-symbols-outlined">history</span> Histórico Admin.
+        </a>
+        {% if user.is_superuser %}
+        <div class="sidebar-grupo">Administração</div>
+        <a class="sidebar-link {% if request.resolver_match.view_name|startswith:'usuarios' %}ativo{% endif %}" href="{% url 'usuarios:lista' %}">
+            <span class="material-symbols-outlined">manage_accounts</span> Usuários
+        </a>
+        {% endif %}
+    </nav>
+    <div class="sidebar-rodape">
+        <div class="avatar">{{ user.get_full_name|default:user.username|slice:':1'|upper }}</div>
+        <div>
+            <div class="nome">{{ user.get_full_name|default:user.username }}</div>
+            <div class="cargo">{{ user.cargo_exibicao }}</div>
+        </div>
+    </div>
+</aside>
+<div class="sidebar-mascara" onclick="document.body.classList.remove('sidebar-aberto')"></div>
+<div class="app-main">
+    <header class="app-topbar">
+        <div class="topbar-esq">
+            <button class="menu-botao" type="button" onclick="document.body.classList.toggle('sidebar-aberto')" aria-label="Abrir menu">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+        </div>
+        <div class="topbar-dir">
+            <div class="topbar-usuario">
+                <div class="avatar">{{ user.get_full_name|default:user.username|slice:':1'|upper }}</div>
+                <div>
+                    <div class="nome">{{ user.get_full_name|default:user.username }}</div>
+                    <div class="cargo">{{ user.cargo_exibicao }}</div>
+                </div>
+            </div>
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button class="btn btn-secundario btn-sm" type="submit">
+                    <span class="material-symbols-outlined">logout</span> Sair
+                </button>
+            </form>
+        </div>
+    </header>
+    <main class="app-conteudo">
+        {% if messages %}
+            {% for message in messages %}
+                {% if message.tags == 'error' %}
+                <div class="alerta alerta-erro"><span class="material-symbols-outlined">error</span> {{ message }}</div>
+                {% elif message.tags == 'success' %}
+                <div class="alerta alerta-sucesso"><span class="material-symbols-outlined">check_circle</span> {{ message }}</div>
+                {% else %}
+                <div class="alerta alerta-info"><span class="material-symbols-outlined">info</span> {{ message }}</div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+        {% block conteudo %}{% endblock %}
+    </main>
+</div>
+{% else %}
+<main class="app-conteudo">
+    {% block conteudo_login %}{% endblock %}
+</main>
+{% endif %}
+<script>
+document.querySelectorAll('[data-modal-abrir]').forEach(function (botao) {
+    botao.addEventListener('click', function () {
+        var alvo = document.querySelector(botao.getAttribute('data-modal-abrir'));
+        if (alvo) alvo.classList.add('mostrar');
+    });
+});
+document.querySelectorAll('[data-modal-fechar]').forEach(function (el) {
+    el.addEventListener('click', function () {
+        var modal = el.closest('.modal');
+        if (modal) modal.classList.remove('mostrar');
+    });
+});
+document.querySelectorAll('.modal').forEach(function (modal) {
+    modal.addEventListener('click', function (evento) {
+        if (evento.target === modal) modal.classList.remove('mostrar');
+    });
+});
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

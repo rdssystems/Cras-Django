@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block titulo %}Certidões - CRAS{% endblock %}
+{% block conteudo %}
+<div class="topo-pagina">
+    <div>
+        <h1>Certidões</h1>
+    </div>
+    <div class="topo-acoes">
+        <a class="btn btn-primario" href="{% url 'certidoes:criar' %}">
+            <span class="material-symbols-outlined">add_circle</span> Nova certidão
+        </a>
+    </div>
+</div>
+<div class="resumo-chips">
+    <span class="chip"><span class="material-symbols-outlined" style="color:#d97706">hourglass_top</span> Pendentes de entrega: <strong>{{ pendentes }}</strong></span>
+    <span class="chip"><span class="material-symbols-outlined" style="color:#0f766e">inventory_2</span> Total: {{ certidoes|length }}</span>
+</div>
+<div class="card">
+    <div class="tabela-wrap">
+        <table class="tabela">
+            <thead>
+                <tr>
+                    <th>Solicitação</th><th>Quem solicitou</th><th>De quem</th><th>Telefone</th>
+                    <th>Servidor</th><th>Cidade</th><th>Recebimento</th><th>Entrega</th><th>Entregue para</th><th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in certidoes %}
+                <tr>
+                    <td>{{ c.data_solicitacao|date:'d/m/Y' }}</td>
+                    <td><strong>{{ c.quem_solicitou }}</strong></td>
+                    <td>{{ c.de_quem }}</td>
+                    <td>{{ c.telefone|default:'—' }}</td>
+                    <td>{{ c.servidor|default:'—' }}</td>
+                    <td>{{ c.cidade|default:'—' }}</td>
+                    <td>
+                        {% if c.data_recebimento %}
+                        <span class="badge-pill badge-verde"><span class="dot"></span>{{ c.data_recebimento|date:'d/m/Y' }}</span>
+                        {% else %}
+                        <span class="badge-pill badge-neutro">Aguardando</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if c.data_entrega %}
+                        <span class="badge-pill badge-verde"><span class="dot"></span>{{ c.data_entrega|date:'d/m/Y' }}</span>
+                        {% else %}
+                        <span class="badge-pill badge-ambar"><span class="dot"></span>Pendente</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ c.entregue_para|default:'—' }}</td>
+                    <td><a class="btn btn-secundario btn-sm" href="{% url 'certidoes:editar' c.id %}">Editar</a></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="10"><div class="vazio"><span class="material-symbols-outlined">contract</span>Nenhuma certidão registrada.<br><a class="btn btn-primario mt-2" href="{% url 'certidoes:criar' %}">Registrar primeira certidão</a></div></td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

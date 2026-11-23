@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block titulo %}Triagem - CRAS{% endblock %}
+{% block conteudo %}
+<div class="topo-pagina">
+    <div>
+        <h1>Nova Triagem</h1>
+    </div>
+</div>
+<div class="card" style="max-width:640px">
+    <div class="card-pad">
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {% for erro in form.non_field_errors %}<div class="alerta alerta-erro">{{ erro }}</div>{% endfor %}
+            {% include '_campo.html' with campo=form.nome %}
+            {% include '_campo.html' with campo=form.cpf %}
+
+            <fieldset class="campo campo-grupo{% if form.tipo_fila.errors %} com-erro{% endif %}">
+                <legend>{{ form.tipo_fila.label }} <span class="obrigatorio">*</span></legend>
+                <div class="opcoes-fila">
+                    {% for opcao in form.tipo_fila %}
+                    <label class="opcao-fila {% if forloop.first %}tone-teal{% else %}tone-azul{% endif %}" for="{{ opcao.id_for_label }}">
+                        {{ opcao.tag }}
+                        <span class="material-symbols-outlined">{% if forloop.first %}description{% else %}psychology{% endif %}</span>
+                        <span>{{ opcao.choice_label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                {% for erro in form.tipo_fila.errors %}<div class="erro-campo">{{ erro }}</div>{% endfor %}
+            </fieldset>
+
+            {% include '_campo.html' with campo=form.prioridade %}
+            {% include '_campo.html' with campo=form.resolvido_na_triagem %}
+
+            <div class="form-acoes">
+                <button class="btn btn-primario" type="submit">
+                    <span class="material-symbols-outlined">check_circle</span> Registrar triagem
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

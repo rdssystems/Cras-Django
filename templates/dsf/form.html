@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block titulo %}Novo DSF - CRAS{% endblock %}
+{% block conteudo %}
+<div class="topo-pagina">
+    <div>
+        <h1>Novo DSF Concluído</h1>
+    </div>
+</div>
+<div class="card" style="max-width:640px">
+    <div class="card-pad">
+        <form method="post">
+            {% csrf_token %}
+            {% for campo in form %}
+            {% include '_campo.html' %}
+            {% endfor %}
+            <div class="form-acoes">
+                <button class="btn btn-primario" type="submit">
+                    <span class="material-symbols-outlined">save</span> Salvar
+                </button>
+                <a class="btn btn-secundario" href="{% url 'dsf:lista' %}">Voltar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

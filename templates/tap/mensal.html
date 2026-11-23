@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load cras_extras %}
+{% block titulo %}TAP Mensal - CRAS{% endblock %}
+{% block conteudo %}
+<div class="topo-pagina">
+    <div>
+        <h1>TAP Mensal</h1>
+    </div>
+</div>
+<form method="get" class="filtros">
+    <div class="campo">
+        <label>Ano</label>
+        <input type="number" name="ano" class="form-control" value="{{ ano }}" min="2020" max="2100">
+    </div>
+    <div class="campo">
+        <label>Mês</label>
+        <select name="mes" class="form-select">
+            {% for m in '1,2,3,4,5,6,7,8,9,10,11,12'|split:',' %}
+            <option value="{{ m }}" {% if m|add:0 == mes %}selected{% endif %}>{{ m }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button class="btn btn-primario" type="submit">Abrir mês</button>
+</form>
+<form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="ano" value="{{ ano }}">
+    <input type="hidden" name="mes" value="{{ mes }}">
+    <div class="card">
+        <div class="card-header">
+            <h2>TAP de {{ mes }}/{{ ano }}</h2>
+            <span class="badge-pill badge-teal"><span class="dot"></span>{{ dias }} dias</span>
+        </div>
+        <div class="tabela-wrap">
+            <table class="tabela">
+                <thead><tr><th style="width:100px">DIA</th><th style="width:200px">TAP DIÁRIO</th></tr></thead>
+                <tbody>
+                    {% for linha in linhas %}
+                    <tr>
+                        <td><strong>{{ linha.dia }}</strong></td>
+                        <td>
+                            {% for campo in form %}
+                                {% if campo.name == linha.campo %}{{ campo }}{% endif %}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    <tr style="background:#f8fafc">
+                        <td><strong>TOTAL</strong></td>
+                        <td><strong style="font-size:18px;color:#0f766e">{{ total }}</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="form-acoes mt-2">
+        <button class="btn btn-primario" type="submit">
+            <span class="material-symbols-outlined">save</span> Salvar TAP do mês
+        </button>
+    </div>
+</form>
+{% endblock %}

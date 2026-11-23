@@ -1,0 +1,24 @@
+# Dados reais de cidadãos (nome, CPF, telefone): NUNCA versionar.
+db.sqlite3
+db.sqlite3-journal
+*.sqlite3
+*.xlsx
+*.xls
+summary.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# Arquivos gerados
+staticfiles/
+media/
+
+# Editores e sistema
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store

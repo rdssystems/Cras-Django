@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=Plus+Jakarta+Sans:wght@100..900&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={"darkMode":"class","theme":{"extend":{"colors":{"surface-variant":"#d3e4fe","surface-container-lowest":"#ffffff","on-secondary-container":"#663500","surface":"#f8f9ff","on-error-container":"#93000a","on-secondary-fixed-variant":"#6e3900","tertiary-container":"#0165d8","tertiary-fixed-dim":"#adc6ff","secondary":"#904d00","surface-container":"#e5eeff","secondary-container":"#fe932c","on-surface":"#0b1c30","on-primary":"#ffffff","tertiary-fixed":"#d8e2ff","on-primary-fixed-variant":"#00504a","on-tertiary-fixed":"#001a42","inverse-primary":"#80d5cb","on-tertiary-fixed-variant":"#004395","tertiary":"#004eaa","primary":"#005c55","surface-dim":"#cbdbf5","on-background":"#0b1c30","surface-bright":"#f8f9ff","primary-fixed-dim":"#80d5cb","surface-container-highest":"#d3e4fe","outline-variant":"#bdc9c6","on-primary-container":"#a3faef","on-error":"#ffffff","on-tertiary":"#ffffff","inverse-on-surface":"#eaf1ff","primary-fixed":"#9cf2e8","surface-container-high":"#dce9ff","error":"#ba1a1a","primary-container":"#0f766e","secondary-fixed-dim":"#ffb77d","inverse-surface":"#213145","outline":"#6e7977","secondary-fixed":"#ffdcc3","on-surface-variant":"#3e4947","surface-tint":"#006a63","on-tertiary-container":"#e4eaff","error-container":"#ffdad6","on-secondary-fixed":"#2f1500","on-primary-fixed":"#00201d","background":"#f8f9ff","surface-container-low":"#eff4ff","on-secondary":"#ffffff"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"space-xs":"0.25rem","space-lg":"1.5rem","gutter":"1.5rem","margin-tablet":"1.5rem","space-md":"1rem","space-xl":"2rem","margin-mobile":"1rem","space-2xl":"3rem","gutter-mobile":"1rem","space-sm":"0.5rem","margin":"2rem"},"fontFamily":{"body-sm":["Inter"],"headline-lg-mobile":["Plus Jakarta Sans"],"headline-md":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"label-lg":["Inter"],"headline-xl-mobile":["Plus Jakarta Sans"],"body-md":["Inter"],"headline-xl":["Plus Jakarta Sans"],"headline-sm":["Plus Jakarta Sans"],"body-lg":["Inter"],"label-md":["Inter"],"metric-display":["Plus Jakarta Sans"]},"fontSize":{"body-sm":["0.8125rem",{"lineHeight":"1.25rem","fontWeight":"400"}],"headline-lg-mobile":["1.375rem",{"lineHeight":"1.75rem","fontWeight":"600"}],"headline-md":["1.25rem",{"lineHeight":"1.75rem","fontWeight":"600"}],"headline-lg":["1.75rem",{"lineHeight":"2.25rem","letterSpacing":"-0.015em","fontWeight":"600"}],"label-lg":["0.875rem",{"lineHeight":"1.25rem","letterSpacing":"0.01em","fontWeight":"600"}],"headline-xl-mobile":["1.75rem",{"lineHeight":"2.25rem","letterSpacing":"-0.01em","fontWeight":"700"}],"body-md":["0.9375rem",{"lineHeight":"1.5rem","fontWeight":"400"}],"headline-xl":["2.25rem",{"lineHeight":"2.75rem","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-sm":["1.125rem",{"lineHeight":"1.5rem","fontWeight":"600"}],"body-lg":["1.125rem",{"lineHeight":"1.75rem","fontWeight":"400"}],"label-md":["0.75rem",{"lineHeight":"1rem","letterSpacing":"0.02em","fontWeight":"600"}],"metric-display":["2.5rem",{"lineHeight":"3rem","letterSpacing":"-0.03em","fontWeight":"800"}]}}}};</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-low shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between select-none"><div class="flex flex-col"><div class="h-16 px-space-md flex items-center gap-space-sm bg-surface-container-low"><img alt="CRAS Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4XKodD6XLkavlUle-srQTBJ4I5E4ZjmNYLZpEJzBg9Og_RayNUDKmHZLECJbCuQ7BrNuixH5H6B-6DYl2Bta0W9g6aIuo45tASRfBqrIdkdNGzQw35-O-PfEi7X0RYyuJFyQpAPi3Nu3RSaxWsHGBUb0qPflbeeRf4fUVTI_3zIN_IQgeOqaOLLCYbMjfzjeAdgIIAFPfUF0AYLjB8MEbj6Ouzw6aYy7ESa6hWQ"/><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-primary leading-tight font-bold">CRAS Digital</span><span class="font-label-md text-label-md text-on-surface-variant leading-tight">Assistência Social • Prefeitura</span></div></div><div class="px-space-md pt-space-md"><span class="font-label-md text-label-md text-outline uppercase tracking-wider px-space-sm">Menu Operacional</span></div><nav class="flex flex-col gap-1 px-space-sm mt-space-xs" data-active-classes="bg-primary-container text-on-primary font-label-lg shadow-sm"><a aria-current="page" class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg transition-all bg-primary-container text-on-primary font-label-lg shadow-sm" data-path="painel-de-atendimentos" href="#"><span class="material-symbols-outlined text-[20px]">dashboard</span><span>Painel de Atendimentos</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant font-label-lg text-label-lg hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="nova-triagem" href="#"><span class="material-symbols-outlined text-[20px]">person_add</span><span>Nova Triagem</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant font-label-lg text-label-lg hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="filas-de-espera" href="#"><span class="material-symbols-outlined text-[20px]">view_list</span><span>Filas de Espera</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant font-label-lg text-label-lg hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="cadastro-unico" href="#"><span class="material-symbols-outlined text-[20px]">badge</span><span>Cadastro Único (CadÚnico)</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant font-label-lg text-label-lg hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="relatorios-e-estatisticas" href="#"><span class="material-symbols-outlined text-[20px]">analytics</span><span>Relatórios &amp; Estatísticas</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant font-label-lg text-label-lg hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="configuracoes" href="#"><span class="material-symbols-outlined text-[20px]">settings</span><span>Configurações</span></a></nav></div><div class="p-space-md flex flex-col gap-space-sm bg-surface-container-low"><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant font-label-lg text-label-lg hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="suporte" href="#"><span class="material-symbols-outlined text-[20px]">help_outline</span><span>Suporte e Manuais</span></a><div class="flex items-center justify-between px-space-sm pt-space-xs text-on-surface-variant font-label-md text-label-md"><span>Versão SUAS</span><span class="px-space-xs py-0.5 rounded bg-surface-container font-label-md text-label-md text-on-surface">v2.4.1</span></div></div></aside><div class="pl-64"><header class="fixed top-0 left-64 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-space-lg"><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs bg-surface-container-low px-space-md py-1.5 rounded-full"><span class="material-symbols-outlined text-primary text-[18px]">corporate_fare</span><span class="font-label-md text-label-md text-primary font-bold tracking-tight">CRAS Esperança - Região Norte</span></div><div class="relative flex items-center"><span class="material-symbols-outlined absolute left-space-sm text-outline text-[18px]">search</span><input class="w-80 h-9 pl-8 pr- space-md bg-surface-container-low rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/20" placeholder="Buscar cidadão por CPF, NIS ou Nome... (Pressione /)" type="text"/></div></div><div class="flex items-center gap-space-md"><button class="relative p-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="Notificações e Chamados" type="button"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-error rounded-full ring-2 ring-surface-container-lowest"></span></button><div class="h-6 w-px bg-surface-container"></div><div class="flex items-center gap-space-sm"><div class="flex flex-col text-right"><span class="font-label-lg text-label-lg text-on-surface leading-tight font-bold">Mariana Silveira</span><span class="font-label-md text-label-md text-on-surface-variant leading-tight">Assistente Social / Triagem</span></div><div class="relative"><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-2 ring-surface-container" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAcGUdcIJycXb-7X6q3pRY6fo9VScNUeLuVvuzLGarpbIIz_sFLJ2sodN9PsSG7YpA9jzX9_V_--dKcymyIIty69-pqIOGjiF6xBOtIjGhmhNKUkHQiULVp9kr_tCfkYOCNWciSn8r8afxFZgpP4FAoGy_qa8tW9ZbBHe-iVvVaQwNn5gJf0lnPZWHqVc9IEZ5yo7nBkC1g6eUTkS71pT_whXz8Mf6EAWJM2hPwGA"/><span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-secondary ring-1 ring-surface-container-lowest" title="Status: Em Atendimento"></span></div></div></div></header><main class="relative pt-16 bg-surface min-h-screen w-full px-space-lg"><div class="flex flex-col w-full pb-space-2xl">
+<!-- CABEÇALHO DO PAINEL -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md py-space-lg">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-space-sm">
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Painel Geral de Atendimentos do Dia</h1>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface-container-high text-primary font-label-md text-label-md">
+<span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+          Tempo Real
+        </span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px] text-outline">calendar_today</span>
+        Hoje, 24 de Outubro de 2024 • <strong class="text-on-surface font-semibold">Unidade: CRAS Esperança</strong>
+</p>
+</div>
+<!-- Botões de Ação Rápida -->
+<div class="flex items-center flex-wrap gap-space-sm">
+<button class="inline-flex items-center gap-2 px-space-md py-2.5 rounded-lg bg-surface-container-lowest text-primary font-label-lg text-label-lg shadow-sm hover:bg-surface-container-low transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px] text-secondary">tv</span>
+<span>Chamar Próximo no Painel TV</span>
+</button>
+<button class="inline-flex items-center gap-2 px-space-md py-2.5 rounded-lg bg-primary-container text-on-primary font-label-lg text-label-lg shadow-sm hover:opacity-95 transition-opacity" type="button">
+<span class="material-symbols-outlined text-[20px]">add_circle</span>
+<span>+ Nova Triagem / Senha</span>
+</button>
+</div>
+</div>
+<!-- MÉTRICAS DO DIA -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-lg mb-space-xl">
+<!-- Card 1: Total Hoje -->
+<div class="relative overflow-hidden rounded-xl bg-surface-container-lowest p-space-lg shadow-sm flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div class="flex flex-col gap-1">
+<span class="font-label-md text-label-md text-outline uppercase tracking-wider">Total de Atendimentos</span>
+<span class="font-metric-display text-metric-display text-on-surface">84</span>
+</div>
+<div class="w-11 h-11 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[26px]">groups</span>
+</div>
+</div>
+<div class="mt-space-md pt-space-sm flex flex-col gap-space-xs">
+<div class="flex items-center gap-1.5 text-primary font-label-md text-label-md">
+<span class="material-symbols-outlined text-[18px]">trending_up</span>
+<span>+12% em relação à média diária</span>
+</div>
+<div class="flex items-center gap-2 mt-1">
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high font-label-md text-label-md text-on-surface-variant">42 Triagens</span>
+<span class="text-outline">•</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high font-label-md text-label-md text-on-surface-variant">42 Especializados</span>
+</div>
+</div>
+</div>
+<!-- Card 2: Aguardando Atendimento (Acento Âmbar) -->
+<div class="relative overflow-hidden rounded-xl bg-surface-container-lowest p-space-lg shadow-sm flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div class="flex flex-col gap-1">
+<span class="font-label-md text-label-md text-secondary uppercase tracking-wider">Aguardando Atendimento</span>
+<span class="font-metric-display text-metric-display text-secondary">19</span>
+</div>
+<div class="w-11 h-11 rounded-lg bg-secondary-fixed/50 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[26px]">schedule</span>
+</div>
+</div>
+<div class="mt-space-md pt-space-sm flex flex-col gap-space-xs">
+<div class="flex items-center gap-1.5 text-secondary font-label-md text-label-md">
+<span class="material-symbols-outlined text-[18px]">hourglass_top</span>
+<span>Tempo médio de espera: <strong>18 min</strong></span>
+</div>
+<div class="flex items-center gap-1.5 mt-1 font-body-sm text-body-sm text-on-surface-variant">
+<span class="font-semibold text-secondary">7 Prioritários (Lei 10.048)</span>
+<span>•</span>
+<span>12 Convencionais</span>
+</div>
+</div>
+</div>
+<!-- Card 3: Atendidos e Finalizados (Acento Verde/Primário) -->
+<div class="relative overflow-hidden rounded-xl bg-surface-container-lowest p-space-lg shadow-sm flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div class="flex flex-col gap-1">
+<span class="font-label-md text-label-md text-primary-container uppercase tracking-wider">Atendidos e Finalizados</span>
+<span class="font-metric-display text-metric-display text-primary">65</span>
+</div>
+<div class="w-11 h-11 rounded-lg bg-primary-fixed/40 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[26px]">task_alt</span>
+</div>
+</div>
+<div class="mt-space-md pt-space-sm flex flex-col gap-space-xs">
+<div class="flex items-center gap-1.5 text-primary font-label-md text-label-md">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span><strong>94%</strong> resolvidos no primeiro nível</span>
+</div>
+<div class="text-body-sm font-body-sm text-on-surface-variant mt-1">
+          Tempo médio de sessão individual: <strong>24 min</strong>
+</div>
+</div>
+</div>
+</div>
+<!-- CONTEXTO OPERACIONAL / BANNER RÁPIDO DO DIA -->
+<div class="w-full bg-surface-container-low rounded-xl p-space-md mb-space-lg flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-full bg-surface-container-lowest flex items-center justify-center text-primary shadow-sm shrink-0">
+<span class="material-symbols-outlined text-[22px]">campaign</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg text-on-surface">Escala Técnica Ativa Hoje: 3 Assistentes Sociais, 2 Psicólogos e 2 Operadores CadÚnico</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Guichês em operação: Sala 01 (Triagem), Sala 03 (CadÚnico/BPC), Sala 04 (PAIF), e Recepção Central</span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm self-end lg:self-center">
+<button class="px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface font-label-md text-label-md shadow-sm hover:bg-surface-container-high transition-colors" type="button">
+        Gerenciar Salas
+      </button>
+<button class="px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface font-label-md text-label-md shadow-sm hover:bg-surface-container-high transition-colors" type="button">
+        Exportar Resumo
+      </button>
+</div>
+</div>
+<!-- GRADE DE FILAS DO DIA -->
+<div class="flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Filas Operacionais em Andamento</h2>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-md text-label-md font-bold">4 Ativas</span>
+</div>
+<span class="font-label-md text-label-md text-outline">Clique em 'Chamar' para bipar a senha no display público</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-space-lg">
+<!-- FILA 1: Triagem Inicial -->
+<div class="flex flex-col bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+<!-- Header da Fila -->
+<div class="p-space-md bg-surface-container-low flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="font-label-lg text-label-lg text-on-surface font-bold flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+              Recepção &amp; Triagem Inicial
+            </span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-lowest text-primary font-label-md text-label-md font-bold shadow-sm">
+              6 na fila
+            </span>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant">
+<span>Guichê 01 &amp; 02</span>
+<span>Espera média: 12m</span>
+</div>
+<button class="w-full mt-1 py-2 px-3 bg-primary text-on-primary rounded-lg font-label-md text-label-md font-semibold flex items-center justify-center gap-1.5 shadow-sm hover:opacity-90 transition-opacity" type="button">
+<span class="material-symbols-outlined text-[18px]">volume_up</span>
+            Chamar Próximo (T-038)
+          </button>
+</div>
+<!-- Lista de Pessoas Aguardando -->
+<div class="p-space-sm flex flex-col divide-y-0 gap-1.5 flex-1">
+<!-- Item 1 -->
+<div class="p-2.5 rounded-lg bg-secondary-fixed/20 hover:bg-secondary-fixed/30 transition-colors flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-primary font-bold">Senha T-038</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-md text-label-md font-semibold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Prioridade 65+ anos
+              </span>
+</div>
+<span class="font-body-md text-body-md text-on-surface font-semibold truncate">Maria Aparecida dos Santos</span>
+<div class="flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant">
+<span>Chegada: 09:12</span>
+<span class="text-secondary font-medium">Espera: 28 min</span>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="p-2.5 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface font-bold">Senha T-039</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-md text-label-md">Normal</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface font-semibold truncate">Carlos Eduardo de Freitas</span>
+<div class="flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant">
+<span>Chegada: 09:18</span>
+<span>Espera: 22 min</span>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="p-2.5 rounded-lg bg-secondary-fixed/20 hover:bg-secondary-fixed/30 transition-colors flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-primary font-bold">Senha T-040</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-md text-label-md font-semibold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Gestante
+              </span>
+</div>
+<span class="font-body-md text-body-md text-on-surface font-semibold truncate">Raimunda Ferreira da Costa</span>
+<div class="flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant">
+<span>Chegada: 09:22</span>
+<span class="text-secondary font-medium">Espera: 18 min</span>
+</div>
+</div>
+<!-- Item 4 -->
+<div class="p-2.5 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface font-bold">Senha T-041</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-md text-label-md">Normal</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface font-semibold truncate">José Roberto Alcantara</span>
+<div class="flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant">
+<span>Chegada: 09:25</span>
+<span>Espera: 15 min</span>
+</div>
+</div>
+<!-- Item 5 -->
+<div class="p-2.5 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface font-bold">Senha T-042</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-md text-label-md">Normal</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface font-semibold truncate">Luana Mendes de Oliveira</span>
+<div class="flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant">
+<span>Chegada: 09:30</span>
+<span>Espera: 10 min</span>
+</div>
+</div>
+</div>
+<div class="p-space-sm bg-surface-container-lowest mt-auto text-center">
+<button class="w-full py-1 text-primary font-label-md text-label-md hover:underline" type="button">
+            Ver todos os 6 cidadãos
+          </button>
+</div>
+</div>
+<!-- FILA 2: Assistente Social (Benefícios & CadÚnico) -->
+<div class="flex flex-col bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+<!-- Header da Fila -->
+<div class="p-space-md bg-surface-container-low flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="font-label-lg text-label-lg text-on-surface font-bold flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary"></span>
+              Assistência Social &amp; CadÚnico
+            </span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-lowest text-secondary font-label-md text-label-md font-bold shadow-sm">
+              5 na fila
+            </span>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant">
+<span>Salas 02 &amp; 03</span>
+<span>Espera média: 25m</span>
+</div>
+<button class="w-full mt-1 py-2 px-3 bg-secondary text-on-primary rounded-lg font-label-md text-label-md font-semibold flex items-center justify-center gap-1.5 shadow-sm hover:opacity-90 transition-opacity" type="button">
+<span class="material-symbols-outlined text-[18px]">volume_up</span>
+            Chamar Próximo (AS-015)
+          </button>
+</div>
+<!-- Lista de Pessoas Aguardando -->
+<div class="p-space-sm flex flex-col gap-1.5 flex-1">
+<!-- Item 1 -->
+<div class="p-2.5 rounded-lg bg-secondary-fixed/20 hover:bg-secondary-fixed/30 transition-colors flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-secondary font-bold">Senha AS-015</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-md text-label-md font-semibold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> PcD / BPC
+              </span>
+</div>
+<span class="font-body-md text-body-md text-on-surface font-semibold truncate">Francisca Lima Nascimento</span>
+<div class="flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant">
+<span>Chegada: 08:50</span>
+<span class="text-secondary font-medium">Espera: 50 min</span>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="p-2.5 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface font-bold">Senha AS-016</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-md text-label-md">Normal</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface font-semibold truncate">Marcos Antonio Vieira</span>
+<div class="flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant">
+<span>Chegada: 09:05</span>
+<span>Espera: 35 min</span>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="p-2.5 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface font-bold">Senha AS-017</span>
+<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-primary font-label-md text-label-md font-medium">Atualização CadÚnico</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface font-semibold truncate">Vanessa Souza Ribeiro</span>
+<div class="flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant">
+<span>Chegada: 09:15</span>
+<span>Espera: 25 min</span>
+</div>
+</div>
+<!-- Item 4 -->
+<div class="p-2.5 rounded-lg bg-secondary-fixed/20 hover:bg-secondary-fixed/30 transition-colors flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-secondary font-bold">Senha AS-018</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-md text-label-md font-semibold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Prioridade 70+
+              </span>
+</div>
+<span class="font-body-md text-body-md text-on-surface font-semibold truncate">Geraldo Magela Duarte</span>
+<div class="flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant">
+<span>Chegada: 09:20</span>
+<span class="text-secondary font-medium">Espera: 20 min</span>
+</div>
+</div>
+<!-- Item 5 -->
+<div class="p-2.5 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface font-bold">Senha AS-019</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-md text-label-md">Auxílio Gás</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface font-semibold truncate">Cleide da Silva Barreto</span>
+<div class="flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant">
+<span>Chegada: 09:28</span>
+<span>Espera: 12 min</span>
+</div>
+</div>
+</div>
+<div class="p-space-sm bg-surface-container-lowest mt-auto text-center">
+<button class="w-full py-1 text-primary font-label-md text-label-md hover:underline" type="button">
+            Ver prontuários da fila
+          </button>
+</div>
+</div>
+<!-- FILA 3: Atendimento Psicológico (PAIF) -->
+<div class="flex flex-col bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+<!-- Header da Fila -->
+<div class="p-space-md bg-surface-container-low flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="font-label-lg text-label-lg text-on-surface font-bold flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-tertiary"></span>
+              Psicológico &amp; PAIF
+            </span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-lowest text-tertiary font-label-md text-label-md font-bold shadow-sm">
+              4 na fila
+            </span>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant">
+<span>Salas 04 &amp; 05</span>
+<span>Sessão: ~40m</span>
+</div>
+<button class="w-full mt-1 py-2 px-3 bg-tertiary text-on-primary rounded-lg font-label-md text-label-md font-semibold flex items-center justify-center gap-1.5 shadow-sm hover:opacity-90 transition-opacity" type="button">
+<span class="material-symbols-outlined text-[18px]">volume_up</span>
+            Chamar Próximo (PSI-008)
+          </button>
+</div>
+<!-- Lista de Pessoas Aguardando -->
+<div class="p-space-sm flex flex-col gap-1.5 flex-1">
+<!-- Item 1 -->
+<div class="p-2.5 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-tertiary font-bold">Senha PSI-008</span>
+<span class="px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed-variant font-label-md text-label-md font-medium">Acolhimento Familiar</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface font-semibold truncate">Ana Paula Cavalcante</span>
+<div class="flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant">
+<span>Chegada: 09:00</span>
+<span>Espera: 40 min</span>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="p-2.5 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-tertiary font-bold">Senha PSI-009</span>
+<span class="px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed-variant font-label-md text-label-md font-medium">Acompanhamento PAIF</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface font-semibold truncate">Rodrigo Barbosa Lima</span>
+<div class="flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant">
+<span>Chegada: 09:10</span>
+<span>Espera: 30 min</span>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="p-2.5 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-tertiary font-bold">Senha PSI-010</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-md text-label-md">Retorno Agendado</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface font-semibold truncate">Silvana Moreira Prado</span>
+<div class="flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant">
+<span>Chegada: 09:24</span>
+<span>Espera: 16 min</span>
+</div>
+</div>
+<!-- Item 4 -->
+<div class="p-2.5 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-tertiary font-bold">Senha PSI-011</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-md text-label-md">Primeira Escuta</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface font-semibold truncate">Michele Tavares Nunes</span>
+<div class="flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant">
+<span>Chegada: 09:35</span>
+<span>Espera: 05 min</span>
+</div>
+</div>
+</div>
+<div class="p-space-sm bg-surface-container-lowest mt-auto text-center">
+<button class="w-full py-1 text-primary font-label-md text-label-md hover:underline" type="button">
+            Agenda do PAIF
+          </button>
+</div>
+</div>
+<!-- FILA 4: Técnico Administrativo / Documentação -->
+<div class="flex flex-col bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+<!-- Header da Fila -->
+<div class="p-space-md bg-surface-container-low flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="font-label-lg text-label-lg text-on-surface font-bold flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-outline"></span>
+              Apoio Administrativo
+            </span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-lowest text-on-surface-variant font-label-md text-label-md font-bold shadow-sm">
+              4 na fila
+            </span>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant">
+<span>Balcão 03 &amp; Expedição</span>
+<span>Espera média: 10m</span>
+</div>
+<button class="w-full mt-1 py-2 px-3 bg-inverse-surface text-inverse-on-surface rounded-lg font-label-md text-label-md font-semibold flex items-center justify-center gap-1.5 shadow-sm hover:opacity-90 transition-opacity" type="button">
+<span class="material-symbols-outlined text-[18px]">volume_up</span>
+            Chamar Próximo (ADM-012)
+          </button>
+</div>
+<!-- Lista de Pessoas Aguardando -->
+<div class="p-space-sm flex flex-col gap-1.5 flex-1">
+<!-- Item 1 -->
+<div class="p-2.5 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface font-bold">Senha ADM-012</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-md text-label-md">Declaração NIS</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface font-semibold truncate">Pedro Henrique Gomes</span>
+<div class="flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant">
+<span>Chegada: 09:14</span>
+<span>Espera: 26 min</span>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="p-2.5 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface font-bold">Senha ADM-013</span>
+<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-primary font-label-md text-label-md font-medium">Cart. Pessoa Idosa</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface font-semibold truncate">Elaine Cristina Dias</span>
+<div class="flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant">
+<span>Chegada: 09:20</span>
+<span>Espera: 20 min</span>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="p-2.5 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface font-bold">Senha ADM-014</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-md text-label-md">Isenção de Tarifa</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface font-semibold truncate">Jorge Washington Braga</span>
+<div class="flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant">
+<span>Chegada: 09:27</span>
+<span>Espera: 13 min</span>
+</div>
+</div>
+<!-- Item 4 -->
+<div class="p-2.5 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface font-bold">Senha ADM-015</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-md text-label-md">2ª Via Documento</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface font-semibold truncate">Beatriz Farias Couto</span>
+<div class="flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant">
+<span>Chegada: 09:32</span>
+<span>Espera: 08 min</span>
+</div>
+</div>
+</div>
+<div class="p-space-sm bg-surface-container-lowest mt-auto text-center">
+<button class="w-full py-1 text-primary font-label-md text-label-md hover:underline" type="button">
+            Emitir declarações avulsas
+          </button>
+</div>
+</div>
+</div>
+</div>
+<!-- RODAPÉ INFORMATIVO / AVISOS DE ATENDIMENTO SOCIAL -->
+<div class="mt-space-xl p-space-lg rounded-xl bg-surface-container-lowest shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined text-[24px]">contact_support</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface">Diretrizes da Lei Federal nº 10.048/2000</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Atendimento prioritário assegurado a idosos, gestantes, lactantes, pessoas com deficiência e pessoas acompanhadas por crianças de colo.</p>
+</div>
+</div>
+<div class="flex items-center gap-space-sm shrink-0">
+<span class="font-label-md text-label-md text-outline">Próxima sincronização com o CadÚnico Nacional em 14 min</span>
+</div>
+</div>
+</div></main></div></body></html>

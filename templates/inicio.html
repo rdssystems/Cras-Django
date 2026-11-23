@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% load static cras_extras %}
+{% block titulo %}Painel - CRAS{% endblock %}
+{% block conteudo %}
+<div class="topo-pagina">
+    <div>
+        <h1>Painel Geral de Atendimentos do Dia</h1>
+        <p class="topo-sub">
+            <span class="material-symbols-outlined">calendar_today</span>
+            Hoje, {{ hoje|date:'d \d\e F \d\e Y' }}
+        </p>
+    </div>
+    <div class="topo-acoes">
+        <a class="btn btn-secundario" href="{% url 'triagem:controle' %}">
+            <span class="material-symbols-outlined">table_view</span> Ver controle do dia
+        </a>
+        <a class="btn btn-primario" href="{% url 'triagem:registrar' %}">
+            <span class="material-symbols-outlined">add_circle</span> Nova triagem
+        </a>
+    </div>
+</div>
+
+<div class="grid-metricas">
+    <div class="metrica" style="--tonal: #eff4ff">
+        <div class="metrica-topo">
+            <div>
+                <div class="metrica-rotulo">Total de atendimentos</div>
+                <div class="metrica-valor">{{ total_hoje }}</div>
+            </div>
+            <div class="metrica-icone" style="background:#eff4ff;color:#0f766e">
+                <span class="material-symbols-outlined">groups</span>
+            </div>
+        </div>
+    </div>
+    <div class="metrica" style="--tonal: #ffdcc3">
+        <div class="metrica-topo">
+            <div>
+                <div class="metrica-rotulo" style="color:#d97706">Aguardando atendimento</div>
+                <div class="metrica-valor" style="color:#d97706">{{ total_aguardando }}</div>
+            </div>
+            <div class="metrica-icone" style="background:#ffdcc3;color:#d97706">
+                <span class="material-symbols-outlined">schedule</span>
+            </div>
+        </div>
+        <div class="metrica-rodape">
+            <span class="material-symbols-outlined" style="font-size:16px">hourglass_top</span>
+            Tempo médio de espera: <strong>{{ espera_media }} min</strong>
+        </div>
+    </div>
+    <div class="metrica" style="--tonal: #d1fae5">
+        <div class="metrica-topo">
+            <div>
+                <div class="metrica-rotulo" style="color:#0f766e">Atendidos e finalizados</div>
+                <div class="metrica-valor" style="color:#0f766e">{{ atendidos }}</div>
+            </div>
+            <div class="metrica-icone" style="background:#d1fae5;color:#0f766e">
+                <span class="material-symbols-outlined">task_alt</span>
+            </div>
+        </div>
+        <div class="metrica-rodape">
+            <span class="material-symbols-outlined" style="font-size:16px">verified</span>
+            <strong>{{ pct_atendidos }}%</strong> do total de hoje atendidos
+        </div>
+    </div>
+</div>
+
+<div class="titulo-secao">
+    <h2>Filas em andamento</h2>
+    <a class="btn btn-secundario btn-sm" href="{% url 'triagem:filas' %}">
+        <span class="material-symbols-outlined">list_alt</span> Ir para as filas
+    </a>
+</div>
+
+<div class="grid-filas">
+    {% for fila in filas %}
+    <div class="card fila-card tone-{{ fila.tone }}">
+        <div class="fila-header">
+            <div class="fila-cabecalho">
+                <span class="fila-titulo"><span class="fila-dot"></span>{{ fila.titulo }}</span>
+                <span class="fila-contador">{{ fila.count }} na fila</span>
+            </div>
+            {% if fila.espera_max is not None %}
+            <div class="fila-sub">
+                <span class="material-symbols-outlined" style="font-size:16px">schedule</span>
+                Espera máxima: {{ fila.espera_max }} min
+            </div>
+            {% endif %}
+        </div>
+        <div class="fila-corpo">
+            {% for item in fila.itens %}
+            <div class="fila-item{% if item.prioritario %} prioridade{% endif %}">
+                <div class="fila-item-topo">
+                    <span class="fila-senha">{{ forloop.counter }}º · Nº {{ item.numero }}</span>
+                    {% if item.etiqueta %}
+                    <span class="badge-pill {% if item.prioritario %}badge-ambar{% else %}badge-neutro{% endif %}"><span class="dot"></span>{{ item.etiqueta }}</span>
+                    {% else %}
+                    <span class="badge-pill badge-neutro">Normal</span>
+                    {% endif %}
+                </div>
+                <span class="fila-nome">{{ item.nome }}</span>
+                <div class="fila-item-rodape">
+                    <span>Chegada: {{ item.hora_entrada|time:'H:i' }}</span>
+                    <span class="fila-espera">Espera: {{ item.tempo_espera_min }} min</span>
+                </div>
+            </div>
+            {% empty %}
+            <div class="fila-vazia">
+                <span class="material-symbols-outlined">mood</span>
+                Ninguém aguardando.
+            </div>
+            {% endfor %}
+        </div>
+        {% if fila.count %}
+        <div class="fila-rodape">
+            <a href="{% url 'triagem:filas' %}#lista-{{ fila.chave }}">{% if fila.count == 1 %}Ver na fila{% else %}Ver todos os {{ fila.count }} na fila{% endif %}</a>
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+{% for secao in secoes_graficos %}
+<section class="secao-graficos" aria-labelledby="secao-{{ forloop.counter }}">
+    <header class="secao-cabecalho">
+        <span class="secao-icone material-symbols-outlined" aria-hidden="true">{{ secao.icone }}</span>
+        <h2 id="secao-{{ forloop.counter }}">{{ secao.titulo }}</h2>
+        {% if secao.sub %}<span class="secao-periodo">{{ secao.sub }}</span>{% endif %}
+    </header>
+    <dl class="card secao-resumo">
+        {% for n in secao.resumo %}
+        <div class="resumo-item">
+            <dt>{{ n.rotulo }}</dt>
+            <dd>{{ n.valor }}{% if n.detalhe %} <span class="resumo-detalhe">{{ n.detalhe }}</span>{% endif %}</dd>
+        </div>
+        {% endfor %}
+    </dl>
+    <div class="grid-graficos">
+        {% for g in secao.graficos %}
+        <div class="card grafico-card{% if g.largo %} grafico-largo{% endif %}">
+            <div class="grafico-topo">
+                <div>
+                    <h3>{{ g.titulo }}</h3>
+                    {% if g.subtitulo %}<span class="sub">{{ g.subtitulo }}</span>{% endif %}
+                </div>
+                {% if not g.vazio %}
+                <button class="grafico-alternar" type="button" data-alternar-tabela aria-pressed="false"
+                        title="Ver como tabela" aria-label="{{ g.titulo }}: ver como tabela">
+                    <span class="material-symbols-outlined">table_rows</span>
+                </button>
+                {% endif %}
+            </div>
+            {% if g.vazio %}
+            <div class="grafico-vazio">Sem registros no período.</div>
+            {% else %}
+            <div class="grafico grafico-{{ g.tipo }}" data-grafico="{{ g.chave }}" role="img" aria-label="{{ g.titulo }}"></div>
+            <div class="grafico-tabela tabela-wrap"></div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endfor %}
+{{ dados_graficos|json_script:"dados-graficos" }}
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static_v 'cras/js/echarts.min.js' %}"></script>
+<script src="{% static_v 'cras/js/painel-graficos.js' %}"></script>
+{% endblock %}

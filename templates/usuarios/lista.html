@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block titulo %}Usuários - CRAS{% endblock %}
+{% block conteudo %}
+<div class="topo-pagina">
+    <div>
+        <h1>Usuários</h1>
+    </div>
+    <div class="topo-acoes">
+        <a class="btn btn-primario" href="{% url 'usuarios:criar' %}">
+            <span class="material-symbols-outlined">person_add</span> Nova conta
+        </a>
+    </div>
+</div>
+<div class="card">
+    <div class="tabela-wrap">
+        <table class="tabela tabela-usuarios">
+            <thead>
+                <tr><th>Nome</th><th>Usuário</th><th>Cargo</th><th>Situação</th><th>Último acesso</th><th></th></tr>
+            </thead>
+            <tbody>
+                {% for u in usuarios %}
+                <tr{% if not u.is_active %} class="inativo"{% endif %}>
+                    <td>
+                        <div class="usuario-celula">
+                            <div class="avatar">{{ u.get_full_name|default:u.username|slice:':1'|upper }}</div>
+                            <div>
+                                <strong>{{ u }}</strong>
+                                {% if u.email %}<div class="texto-muted" style="font-size:12px">{{ u.email }}</div>{% endif %}
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{ u.username }}</td>
+                    <td>
+                        {% if u.cargo == 'PSICOLOGO' or u.cargo == 'ASSISTENTE_SOCIAL' %}
+                        <span class="badge-pill badge-azul"><span class="dot"></span>{{ u.get_cargo_display }}</span>
+                        {% elif u.cargo %}
+                        <span class="badge-pill badge-teal"><span class="dot"></span>{{ u.get_cargo_display }}</span>
+                        {% endif %}
+                        {% if u.is_superuser %}<span class="badge-pill badge-neutro">Administrador</span>{% endif %}
+                    </td>
+                    <td>
+                        {% if u.is_active %}
+                        <span class="badge-pill badge-verde"><span class="dot"></span>Ativa</span>
+                        {% else %}
+                        <span class="badge-pill badge-neutro">Desativada</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ u.last_login|date:'d/m/Y H:i'|default:'Nunca entrou' }}</td>
+                    <td class="acoes-linha">
+                        <a class="btn btn-secundario btn-sm" href="{% url 'usuarios:editar' u.pk %}">
+                            <span class="material-symbols-outlined">edit</span> Editar
+                        </a>
+                        <a class="btn btn-secundario btn-sm" href="{% url 'usuarios:senha' u.pk %}">
+                            <span class="material-symbols-outlined">key</span> Senha
+                        </a>
+                        {% if u.pk != user.pk %}
+                        <form method="post" action="{% url 'usuarios:alternar_ativo' u.pk %}">
+                            {% csrf_token %}
+                            {% if u.is_active %}
+                            <button class="btn btn-secundario btn-sm texto-vermelho" type="submit"
+                                    onclick="return confirm('Desativar a conta de {{ u|escapejs }}? A pessoa não vai conseguir entrar.')">
+                                <span class="material-symbols-outlined">block</span> Desativar
+                            </button>
+                            {% else %}
+                            <button class="btn btn-secundario btn-sm" type="submit">
+                                <span class="material-symbols-outlined">check_circle</span> Reativar
+                            </button>
+                            {% endif %}
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+{# Um campo de formulário com rótulo, asterisco de obrigatório e mensagens de erro. Uso: {% include '_campo.html' with campo=form.nome %} #}
+{% if campo.field.widget.input_type == 'checkbox' %}
+<div class="campo campo-check{% if campo.errors %} com-erro{% endif %}">
+    <label for="{{ campo.id_for_label }}">{{ campo }} <span>{{ campo.label }}</span></label>
+    {% for erro in campo.errors %}<div class="erro-campo">{{ erro }}</div>{% endfor %}
+</div>
+{% else %}
+<div class="campo{% if campo.errors %} com-erro{% endif %}">
+    <label for="{{ campo.id_for_label }}">{{ campo.label }}{% if campo.field.required %} <span class="obrigatorio">*</span>{% endif %}</label>
+    {{ campo }}
+    {% for erro in campo.errors %}<div class="erro-campo">{{ erro }}</div>{% endfor %}
+</div>
+{% endif %}

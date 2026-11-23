@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block titulo %}Filas - CRAS{% endblock %}
+{% block conteudo %}
+<div class="topo-pagina">
+    <div>
+        <h1>Filas de Atendimento</h1>
+        <p class="topo-sub">
+            <span class="material-symbols-outlined">calendar_today</span>
+            Hoje, {{ hoje|date:'d/m/Y' }}
+        </p>
+    </div>
+    <div class="topo-acoes">
+        <a class="btn btn-primario" href="{% url 'triagem:registrar' %}">
+            <span class="material-symbols-outlined">add_circle</span> Nova triagem
+        </a>
+    </div>
+</div>
+
+{% for lista in listas %}
+<section class="card lista-chamada tone-{{ lista.tone }}" id="lista-{{ lista.chave }}">
+    <div class="card-header">
+        <h2 class="lista-titulo"><span class="fila-dot"></span>{{ lista.titulo }}</h2>
+        <div class="lista-info">
+            {% if lista.sem_permissao %}
+            <span class="badge-pill badge-neutro">
+                <span class="material-symbols-outlined" style="font-size:14px">lock</span> Sem permissão
+            </span>
+            {% endif %}
+            <span class="badge-pill badge-{{ lista.tone }}">{{ lista.itens|length }} aguardando</span>
+        </div>
+    </div>
+    {% if lista.itens %}
+    <div class="tabela-wrap">
+        <table class="tabela tabela-chamada">
+            <thead>
+                <tr><th>Ordem</th><th>Senha</th><th>Nome</th><th>Prioridade</th><th>Chegada</th><th>Espera</th><th></th></tr>
+            </thead>
+            <tbody>
+                {% for item in lista.itens %}
+                <tr{% if forloop.first %} class="proximo"{% endif %}>
+                    <td class="ordem">{{ forloop.counter }}º</td>
+                    <td>Nº {{ item.numero }}</td>
+                    <td><strong>{{ item.nome }}</strong></td>
+                    <td>
+                        {% if item.etiqueta %}
+                        <span class="badge-pill {% if item.prioritario %}badge-ambar{% else %}badge-neutro{% endif %}">{{ item.etiqueta }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ item.hora_entrada|time:'H:i'|default:'—' }}</td>
+                    <td>{% if item.tempo_espera_min is not None %}{{ item.tempo_espera_min }} min{% else %}—{% endif %}</td>
+                    <td class="acao">
+                        {% if item.pode %}
+                        <button class="btn btn-verde btn-sm" type="button" data-modal-abrir="#modal-atender-{{ item.id }}">
+                            <span class="material-symbols-outlined">volunteer_activism</span> Atender
+                        </button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="lista-vazia">Ninguém aguardando.</div>
+    {% endif %}
+</section>
+{% endfor %}
+
+{% for lista in listas %}
+    {% for item in lista.itens %}
+        {% if item.pode %}
+            {% include 'triagem/_modal_atender.html' with item=item %}
+        {% endif %}
+    {% endfor %}
+{% endfor %}
+{% endblock %}
