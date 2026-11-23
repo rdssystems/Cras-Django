@@ -1,5 +1,7 @@
 # Mapa do Projeto — Gestão CRAS (Django)
 
+> **Guia principal para agentes: [CLAUDE.md](CLAUDE.md).** Este mapa é a referência detalhada (modelos, rotas, histórico de bugs e achados).
+
 > Levantamento feito em **17/11/2026** a partir da leitura de todo o código, do `manage.py check` e do banco `db.sqlite3` local.
 > Serve como referência rápida do que existe hoje, como as peças se ligam e o que precisa de atenção.
 > **Atualizado no mesmo dia:** os bugs A1–A7 e dois bugs do importador foram corrigidos. Ver a seção 10.
@@ -113,7 +115,7 @@ erDiagram
         string cpf
         time hora_entrada "default = hora atual; editável/nulo"
         time hora_atendimento
-        string status "18 opções (ver seção 6)"
+        string status "17 opções (ver seção 6)"
     }
     RegistroAtendimento {
         date data
@@ -133,7 +135,7 @@ erDiagram
     }
     Dsf {
         string nome
-        string beneficio_solicitado
+        string beneficio_solicitado "CESTA BÁSICA | FRALDA | ABSORVENTE"
         date data
         string resultado "DEFERIDO | INDEFERIDO"
     }
