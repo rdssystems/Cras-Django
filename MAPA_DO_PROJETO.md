@@ -384,8 +384,8 @@ Todos foram confirmados lendo o código e, quando possível, executando trechos 
 
 | # | Tema | Detalhe |
 |---|---|---|
-| B1 | **Versionamento** | A pasta não tem repositório git próprio: está como *untracked* dentro do repo acidental em `C:\Users\Klisman rDs`. Também não há `.gitignore`. Um `git add -A` ali publicaria `db.sqlite3` e a planilha, ambos com **nome, CPF e telefone de cidadãos**. |
-| B2 | **Configuração de produção** | `SECRET_KEY` fixo no código ([cras/settings.py:23](cras/settings.py#L23)), `DEBUG = True`, sem `STATIC_ROOT`, sem variáveis de ambiente e sem `requirements.txt`. |
+| B1 ✅ | **Versionamento** | Desde 23/11/2026 a pasta tem repositório git próprio, publicado em [github.com/rdssystems/Cras-Django](https://github.com/rdssystems/Cras-Django). O repositório é **público**. O `.gitignore` exclui `db.sqlite3`, `*.xlsx` e `summary.json`, que têm nome, CPF e telefone de cidadãos. Confira o `git status` antes de cada commit. |
+| B2 | **Configuração de produção** | `SECRET_KEY` fixo no código ([cras/settings.py:23](cras/settings.py#L23)), e agora **público no GitHub**. É a chave de desenvolvimento (`django-insecure-…`); em produção, use outra chave vinda de variável de ambiente. Também: `DEBUG = True`, sem `STATIC_ROOT`, sem variáveis de ambiente e sem `requirements.txt`. |
 | B3 | **Testes** | ◐ Hoje há 19 testes cobrindo triagem, filas, atendimento, numeração, importador e TAP. Certidões, DSF, administrativo e atendimentos continuam sem testes. |
 | B4 | **Permissões** | Fora a regra de fila, qualquer usuário logado edita certidões, DSF, TAP e vê todo o histórico com CPF. Não há trilha de auditoria. |
 | B5 | **Importador não idempotente** | ◐ Agora há uma trava que exige `--forcar` para reimportar. Mesmo assim, só o TAP usa `update_or_create`, e o resto duplica quando forçado. Certidões e DSF continuam sem importação. Gravação linha a linha no CONTROLE DIÁRIO. |
@@ -394,16 +394,16 @@ Todos foram confirmados lendo o código e, quando possível, executando trechos 
 | B7 | **Sem atualização automática** | Não há auto-refresh, polling nem websocket: as filas só mudam com F5. A pílula enganosa "Tempo real" foi removida da topbar em 17/11/2026. |
 | B8 ✅ | **Listas duplicadas** | Corrigido em 23/11/2026: o modal *Atender* monta tipos e motivos a partir de `RegistroAtendimento.Tipo.choices` e `RegistroAtendimento.MOTIVOS`. |
 | B9 | **Indicador "Atendidos"** | Não conta `ATENDIDO TRIAGEM / ORIENTAÇÃO`. Isso é decisão de negócio, mas hoje o % do Painel exclui quem foi resolvido na triagem. |
-| B10 | **Funcionalidades ausentes** | Gestão de usuários fora do `/admin/`, edição de DSF, exclusão em geral, `servidor2`, relatórios mensais e exportação. |
+| B10 | **Funcionalidades ausentes** | Edição de DSF, exclusão em geral, `servidor2`, relatórios mensais e exportação. |
 | B11 ✅ | **Código** | O `__import__` em certidões foi trocado por `timezone.localdate()`. Os horários da triagem passaram a usar `timezone.localtime()` em vez de `datetime.now()`. |
 
 ---
 
 ## 11. Próximos passos sugeridos (por prioridade)
 
-1. **Proteger os dados:** criar um repo git próprio na pasta, com `.gitignore` que exclua `db.sqlite3`, `*.xlsx`, `summary.json` e `__pycache__/`.
+1. **Definir permissões por cargo** (quem vê a fila psicossocial, quem registra qual tipo de atendimento, quem acessa Certidões/DSF/TAP/Histórico). Ver B4.
 2. **Decidir sobre o registro inválido C1** (apagar ou manter).
-3. **Settings por ambiente** (`.env`) e `requirements.txt`.
+3. **Settings por ambiente** (`.env` com `SECRET_KEY` própria, já que a chave atual está pública) e `requirements.txt`.
 4. **Paginação** em `/atendimentos/` e refresh automático leve nas filas (por exemplo, recarregar a cada 30 s).
 5. **Importador:** importar CERTIDÕES e DSF, e recuperar as datas digitadas como número.
 6. Testes para certidões, DSF e administrativo.
