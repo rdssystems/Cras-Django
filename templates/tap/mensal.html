@@ -9,12 +9,12 @@
 </div>
 <form method="get" class="filtros">
     <div class="campo">
-        <label>Ano</label>
-        <input type="number" name="ano" class="form-control" value="{{ ano }}" min="2020" max="2100">
+        <label for="filtro-ano">Ano</label>
+        <input id="filtro-ano" type="number" name="ano" class="form-control" value="{{ ano }}" min="2020" max="2100">
     </div>
     <div class="campo">
         <label>Mês</label>
-        <select name="mes" class="form-select">
+        <select id="filtro-mes" name="mes" class="form-select">
             {% for m in '1,2,3,4,5,6,7,8,9,10,11,12'|split:',' %}
             <option value="{{ m }}" {% if m|add:0 == mes %}selected{% endif %}>{{ m }}</option>
             {% endfor %}
@@ -47,7 +47,7 @@
                     {% endfor %}
                     <tr style="background:#f8fafc">
                         <td><strong>TOTAL</strong></td>
-                        <td><strong style="font-size:18px;color:#0f766e">{{ total }}</strong></td>
+                        <td><strong style="font-size:18px;color:#2e7a4c">{{ total }}</strong></td>
                     </tr>
                 </tbody>
             </table>

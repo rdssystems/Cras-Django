@@ -2,6 +2,7 @@
 {% load cras_extras %}
 {% block titulo %}Controle Diário - CRAS{% endblock %}
 {% block conteudo %}
+{% include '_abas_painel.html' %}
 <div class="topo-pagina">
     <div>
         <h1>Controle de Atendimentos Diário</h1>
@@ -10,45 +11,45 @@
 
 <form method="get" class="filtros">
     <div class="campo">
-        <label>Data</label>
-        <input type="date" name="data" class="form-control" value="{{ dia|date:'Y-m-d' }}">
+        <label for="filtro-data">Data</label>
+        <input id="filtro-data" type="date" name="data" class="form-control" value="{{ dia|date:'Y-m-d' }}">
     </div>
     <button class="btn btn-primario" type="submit">Filtrar</button>
     <a class="btn btn-secundario" href="{% url 'triagem:controle' %}">Hoje</a>
 </form>
 
 <div class="grid-metricas">
-    <div class="metrica" style="--tonal: #eff4ff">
+    <div class="metrica" style="--tonal: #e6e9f6">
         <div class="metrica-topo">
             <div>
                 <div class="metrica-rotulo">Total</div>
                 <div class="metrica-valor">{{ total }}</div>
             </div>
-            <div class="metrica-icone" style="background:#eff4ff;color:#0f766e">
+            <div class="metrica-icone" style="background:#e6e9f6;color:#2e7a4c">
                 <span class="material-symbols-outlined">groups</span>
             </div>
         </div>
         <div class="metrica-rodape">Atendimentos em {{ dia|date:'d/m/Y' }}</div>
     </div>
-    <div class="metrica" style="--tonal: #d1fae5">
+    <div class="metrica" style="--tonal: #e4f1e8">
         <div class="metrica-topo">
             <div>
-                <div class="metrica-rotulo" style="color:#0f766e">Atendidos</div>
-                <div class="metrica-valor" style="color:#0f766e">{{ atendidos }}</div>
+                <div class="metrica-rotulo" style="color:#2e7a4c">Atendidos</div>
+                <div class="metrica-valor" style="color:#2e7a4c">{{ atendidos }}</div>
             </div>
-            <div class="metrica-icone" style="background:#d1fae5;color:#0f766e">
+            <div class="metrica-icone" style="background:#e4f1e8;color:#2e7a4c">
                 <span class="material-symbols-outlined">task_alt</span>
             </div>
         </div>
         <div class="metrica-rodape">Concluídos no dia</div>
     </div>
-    <div class="metrica" style="--tonal: #ffdcc3">
+    <div class="metrica" style="--tonal: #fdf3d4">
         <div class="metrica-topo">
             <div>
-                <div class="metrica-rotulo" style="color:#d97706">Aguardando</div>
-                <div class="metrica-valor" style="color:#d97706">{{ aguardando }}</div>
+                <div class="metrica-rotulo" style="color:#765800">Aguardando</div>
+                <div class="metrica-valor" style="color:#765800">{{ aguardando }}</div>
             </div>
-            <div class="metrica-icone" style="background:#ffdcc3;color:#d97706">
+            <div class="metrica-icone" style="background:#fdf3d4;color:#765800">
                 <span class="material-symbols-outlined">schedule</span>
             </div>
         </div>

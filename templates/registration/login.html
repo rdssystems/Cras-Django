@@ -6,13 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Entrar - CRAS</title>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Plus+Jakarta+Sans:wght@100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@700&family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="{% static_v 'cras/css/tema.css' %}" rel="stylesheet">
 </head>
 <body class="login-corpo">
     <div class="login-card">
-        <div class="login-logo"><span class="material-symbols-outlined" style="font-size:30px">volunteer_activism</span></div>
-        <h1 class="login-titulo">CRAS</h1>
+        <h1 class="login-titulo"><span class="marca-fita">CRAS</span></h1>
         <p class="sub">Sistema de Gestão de Atendimentos</p>
         {% if form.errors %}
         <div class="alerta alerta-erro">
@@ -22,12 +21,12 @@
         <form method="post">
             {% csrf_token %}
             <div class="campo">
-                <label>Usuário</label>
-                <input type="text" name="username" class="form-control" autofocus required>
+                <label for="login-usuario">Usuário</label>
+                <input id="login-usuario" type="text" name="username" autocomplete="username" class="form-control" autofocus required>
             </div>
             <div class="campo">
-                <label>Senha</label>
-                <input type="password" name="password" class="form-control" required>
+                <label for="login-senha">Senha</label>
+                <input id="login-senha" type="password" name="password" autocomplete="current-password" class="form-control" required>
             </div>
             <button class="btn btn-primario btn-bloco" type="submit">
                 <span class="material-symbols-outlined">login</span> Entrar

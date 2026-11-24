@@ -1,0 +1,13 @@
+services:
+  cras:
+    build: .
+    container_name: cras-django
+    restart: unless-stopped
+    ports:
+      - "8031:8031"
+    environment:
+      DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1,192.168.100.179,testserver,isaque"
+    volumes:
+      - type: bind
+        source: ./db.sqlite3
+        target: /app/db.sqlite3

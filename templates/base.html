@@ -7,97 +7,71 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block titulo %}CRAS{% endblock %}</title>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Plus+Jakarta+Sans:wght@100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@700&family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="{% static_v 'cras/css/tema.css' %}" rel="stylesheet">
 </head>
 <body>
 {% if user.is_authenticated %}
-<aside class="app-sidebar">
-    <div class="sidebar-brand">
-        <div class="logo"><span class="material-symbols-outlined">volunteer_activism</span></div>
-        <div>
-            <h1>CRAS</h1>
-            <small>Gestão de Atendimentos</small>
-        </div>
-    </div>
-    <nav class="sidebar-nav">
-        <div class="sidebar-grupo">Operação</div>
+<a class="atalho-conteudo" href="#conteudo-principal">Ir para o conteúdo</a>
+<div class="app-main">
+<header class="app-topbar">
+    <a class="topbar-marca" href="{% url 'inicio' %}"><span class="marca-fita">CRAS</span></a>
+    <button class="menu-botao" type="button" aria-controls="menu-principal" aria-expanded="false" aria-label="Abrir menu"><span class="material-symbols-outlined" aria-hidden="true">menu</span> Menu</button>
+    <nav id="menu-principal" class="navegacao-principal" aria-label="Navegação principal">
         <a class="sidebar-link {% if request.resolver_match.view_name == 'inicio' %}ativo{% endif %}" href="{% url 'inicio' %}">
-            <span class="material-symbols-outlined">dashboard</span> Painel
+            <span class="material-symbols-outlined" aria-hidden="true">dashboard</span> Painel
         </a>
-        <a class="sidebar-link {% if request.resolver_match.view_name|startswith:'triagem' %}ativo{% endif %}" href="{% url 'triagem:filas' %}">
-            <span class="material-symbols-outlined">groups</span> Filas
+        <a class="sidebar-link {% if request.resolver_match.view_name == 'triagem:filas' %}ativo{% endif %}" href="{% url 'triagem:filas' %}">
+            <span class="material-symbols-outlined" aria-hidden="true">groups</span> Filas
         </a>
-        <a class="sidebar-link" href="{% url 'triagem:registrar' %}">
-            <span class="material-symbols-outlined">person_add</span> Nova Triagem
+        <a class="sidebar-link {% if request.resolver_match.view_name == 'triagem:registrar' %}ativo{% endif %}" href="{% url 'triagem:registrar' %}">
+            <span class="material-symbols-outlined" aria-hidden="true">person_add</span> Nova Triagem
         </a>
-        <a class="sidebar-link" href="{% url 'triagem:controle' %}">
-            <span class="material-symbols-outlined">fact_check</span> Controle Diário
+        <a class="sidebar-link {% if request.resolver_match.view_name == 'triagem:controle' %}ativo{% endif %}" href="{% url 'triagem:controle' %}">
+            <span class="material-symbols-outlined" aria-hidden="true">fact_check</span> Controle Diário
         </a>
-        <div class="sidebar-grupo">Gestão</div>
+        <details class="menu-gestao">
+        <summary class="sidebar-link {% if request.resolver_match.view_name|startswith:'atendimentos' or request.resolver_match.view_name|startswith:'certidoes' or request.resolver_match.view_name|startswith:'dsf' or request.resolver_match.view_name|startswith:'tap' %}ativo{% endif %}"><span class="material-symbols-outlined" aria-hidden="true">folder</span> Gestão <span class="material-symbols-outlined seta-menu" aria-hidden="true">expand_more</span></summary>
+        <div class="menu-gestao-itens">
         <a class="sidebar-link {% if request.resolver_match.view_name|startswith:'atendimentos' %}ativo{% endif %}" href="{% url 'atendimentos:lista' %}">
-            <span class="material-symbols-outlined">description</span> Atendimentos
+            <span class="material-symbols-outlined" aria-hidden="true">description</span> Atendimentos
         </a>
         <a class="sidebar-link {% if request.resolver_match.view_name|startswith:'certidoes' %}ativo{% endif %}" href="{% url 'certidoes:lista' %}">
-            <span class="material-symbols-outlined">contract</span> Certidões
+            <span class="material-symbols-outlined" aria-hidden="true">contract</span> Certidões
         </a>
         <a class="sidebar-link {% if request.resolver_match.view_name|startswith:'dsf' %}ativo{% endif %}" href="{% url 'dsf:lista' %}">
-            <span class="material-symbols-outlined">task</span> DSF Concluído
+            <span class="material-symbols-outlined" aria-hidden="true">task</span> DSF Concluído
         </a>
         <a class="sidebar-link {% if request.resolver_match.view_name|startswith:'tap' %}ativo{% endif %}" href="{% url 'tap:mensal' %}">
-            <span class="material-symbols-outlined">calendar_month</span> TAP Mensal
+            <span class="material-symbols-outlined" aria-hidden="true">calendar_month</span> TAP Mensal
         </a>
-        <a class="sidebar-link {% if request.resolver_match.view_name|startswith:'administrativo' %}ativo{% endif %}" href="{% url 'administrativo:lista' %}">
-            <span class="material-symbols-outlined">history</span> Histórico Admin.
-        </a>
-        {% if user.is_superuser %}
-        <div class="sidebar-grupo">Administração</div>
-        <a class="sidebar-link {% if request.resolver_match.view_name|startswith:'usuarios' %}ativo{% endif %}" href="{% url 'usuarios:lista' %}">
-            <span class="material-symbols-outlined">manage_accounts</span> Usuários
-        </a>
-        {% endif %}
+        </div>
+        </details>
     </nav>
-    <div class="sidebar-rodape">
-        <div class="avatar">{{ user.get_full_name|default:user.username|slice:':1'|upper }}</div>
-        <div>
-            <div class="nome">{{ user.get_full_name|default:user.username }}</div>
-            <div class="cargo">{{ user.cargo_exibicao }}</div>
-        </div>
-    </div>
-</aside>
-<div class="sidebar-mascara" onclick="document.body.classList.remove('sidebar-aberto')"></div>
-<div class="app-main">
-    <header class="app-topbar">
-        <div class="topbar-esq">
-            <button class="menu-botao" type="button" onclick="document.body.classList.toggle('sidebar-aberto')" aria-label="Abrir menu">
-                <span class="material-symbols-outlined">menu</span>
-            </button>
-        </div>
-        <div class="topbar-dir">
-            <div class="topbar-usuario">
-                <div class="avatar">{{ user.get_full_name|default:user.username|slice:':1'|upper }}</div>
-                <div>
-                    <div class="nome">{{ user.get_full_name|default:user.username }}</div>
-                    <div class="cargo">{{ user.cargo_exibicao }}</div>
-                </div>
+    <div class="topbar-dir">
+        {% if user.is_superuser %}
+        <details class="menu-admin">
+            <summary class="admin-botao {% if request.resolver_match.view_name|startswith:'usuarios' or request.resolver_match.view_name|startswith:'administrativo' %}ativo{% endif %}">Administrador <span class="material-symbols-outlined seta-menu" aria-hidden="true">expand_more</span></summary>
+            <div class="menu-admin-itens">
+                <a class="sidebar-link {% if request.resolver_match.view_name|startswith:'usuarios' %}ativo{% endif %}" href="{% url 'usuarios:lista' %}"><span class="material-symbols-outlined" aria-hidden="true">manage_accounts</span> Usuários</a>
+                <a class="sidebar-link {% if request.resolver_match.view_name|startswith:'administrativo' %}ativo{% endif %}" href="{% url 'administrativo:lista' %}"><span class="material-symbols-outlined" aria-hidden="true">history</span> Histórico Admin.</a>
             </div>
-            <form method="post" action="{% url 'logout' %}">
-                {% csrf_token %}
-                <button class="btn btn-secundario btn-sm" type="submit">
-                    <span class="material-symbols-outlined">logout</span> Sair
-                </button>
-            </form>
-        </div>
-    </header>
-    <main class="app-conteudo">
+        </details>
+        {% endif %}
+        <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="btn btn-sair" type="submit"><span class="material-symbols-outlined" aria-hidden="true">logout</span> Sair</button></form>
+    </div>
+</header>
+    <main id="conteudo-principal" class="app-conteudo" tabindex="-1">
         {% if messages %}
             {% for message in messages %}
                 {% if message.tags == 'error' %}
-                <div class="alerta alerta-erro"><span class="material-symbols-outlined">error</span> {{ message }}</div>
+                <div class="alerta alerta-erro"><span class="material-symbols-outlined" aria-hidden="true">error</span> {{ message }}</div>
                 {% elif message.tags == 'success' %}
-                <div class="alerta alerta-sucesso"><span class="material-symbols-outlined">check_circle</span> {{ message }}</div>
+                <div class="alerta alerta-sucesso"><span class="material-symbols-outlined" aria-hidden="true">check_circle</span> {{ message }}</div>
                 {% else %}
-                <div class="alerta alerta-info"><span class="material-symbols-outlined">info</span> {{ message }}</div>
+                <div class="alerta alerta-info"><span class="material-symbols-outlined" aria-hidden="true">info</span> {{ message }}</div>
                 {% endif %}
             {% endfor %}
         {% endif %}
@@ -110,6 +84,40 @@
 </main>
 {% endif %}
 <script>
+var menuBotao = document.querySelector('.menu-botao');
+var menuGestao = document.querySelector('.menu-gestao');
+var menuAdmin = document.querySelector('.menu-admin');
+if (menuBotao) {
+    function fecharMenu() {
+        document.body.classList.remove('menu-aberto');
+        menuBotao.setAttribute('aria-expanded', 'false');
+        menuBotao.setAttribute('aria-label', 'Abrir menu');
+        if (menuGestao) menuGestao.open = false;
+    }
+    menuBotao.addEventListener('click', function () {
+        var aberto = document.body.classList.toggle('menu-aberto');
+        menuBotao.setAttribute('aria-expanded', String(aberto));
+        menuBotao.setAttribute('aria-label', aberto ? 'Fechar menu' : 'Abrir menu');
+    });
+    document.addEventListener('click', function (evento) {
+        if (menuGestao && !menuGestao.contains(evento.target)) menuGestao.open = false;
+        if (menuAdmin && !menuAdmin.contains(evento.target)) menuAdmin.open = false;
+    });
+    document.addEventListener('keydown', function (evento) {
+        if (evento.key === 'Escape') {
+            if (menuAdmin && menuAdmin.open) {
+                menuAdmin.open = false;
+                menuAdmin.querySelector('summary').focus();
+            } else if (menuGestao && menuGestao.open) {
+                menuGestao.open = false;
+                menuGestao.querySelector('summary').focus();
+            } else if (document.body.classList.contains('menu-aberto')) {
+                fecharMenu();
+                menuBotao.focus();
+            }
+        }
+    });
+}
 document.querySelectorAll('[data-modal-abrir]').forEach(function (botao) {
     botao.addEventListener('click', function () {
         var alvo = document.querySelector(botao.getAttribute('data-modal-abrir'));

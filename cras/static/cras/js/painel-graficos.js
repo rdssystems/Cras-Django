@@ -9,17 +9,17 @@
 
     // Paleta validada (contraste, croma e daltonismo) contra a superfície branca dos cards.
     // A ordem é a das camadas do gráfico empilhado: atendidos, resolvidos na triagem, sem atendimento.
-    var SERIES = ['#0d9488', '#3b82f6', '#d97706'];
+    var SERIES = ['#2b3a8c', '#2e7a4c', '#c8471f'];
     var COR = {
-        texto: '#0b1c30',
-        textoSec: '#3e4947',
-        mudo: '#64748b',
-        grade: '#e8edf3',
-        eixo: '#cbd5e1',
+        texto: '#1e2230',
+        textoSec: '#454a5a',
+        mudo: '#555b6b',
+        grade: '#dfe2ec',
+        eixo: '#dfe2ec',
         superficie: '#ffffff',
         faixa: 'rgba(100, 116, 139, 0.08)'
     };
-    var FONTE = "Inter, system-ui, -apple-system, 'Segoe UI', sans-serif";
+    var FONTE = "Lexend, system-ui, -apple-system, 'Segoe UI', sans-serif";
     // O ECharts mede os rótulos do eixo (para reservar espaço) sem herdar a fonte global;
     // sem a fonte em cada rótulo, ele mede numa fonte mais estreita e o texto sai cortado.
     function texto(estilo, extra) { return Object.assign({ fontFamily: FONTE }, estilo, extra); }
@@ -51,7 +51,7 @@
                 trigger: 'axis',
                 confine: true,
                 backgroundColor: COR.superficie,
-                borderColor: '#e2e8f0',
+                borderColor: '#dfe2ec',
                 borderWidth: 1,
                 padding: [8, 12],
                 textStyle: { fontFamily: FONTE, color: COR.texto, fontSize: 13 },
@@ -173,8 +173,8 @@
             itemStyle: { color: cor, borderColor: COR.superficie, borderWidth: 2 },
             areaStyle: {
                 color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                    { offset: 0, color: 'rgba(13, 148, 136, 0.16)' },
-                    { offset: 1, color: 'rgba(13, 148, 136, 0.02)' }
+                    { offset: 0, color: 'rgba(43, 58, 140, 0.16)' },
+                    { offset: 1, color: 'rgba(43, 58, 140, 0.02)' }
                 ])
             },
             emphasis: { focus: 'none', scale: false },

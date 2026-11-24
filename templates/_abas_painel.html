@@ -1,0 +1,4 @@
+<nav class="abas-painel" aria-label="Navegação do painel">
+    <a href="{% url 'inicio' %}" class="aba-painel{% if request.resolver_match.view_name == 'inicio' %} ativa{% endif %}"{% if request.resolver_match.view_name == 'inicio' %} aria-current="page"{% endif %}>Painel</a>
+    <a href="{% url 'triagem:controle' %}" class="aba-painel{% if request.resolver_match.view_name == 'triagem:controle' %} ativa{% endif %}"{% if request.resolver_match.view_name == 'triagem:controle' %} aria-current="page"{% endif %}>Controle Diário</a>
+</nav>

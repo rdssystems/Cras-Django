@@ -8,8 +8,8 @@
 </div>
 <form method="get" class="filtros">
     <div class="campo">
-        <label>Data</label>
-        <input type="date" name="data" class="form-control">
+        <label for="filtro-data">Data</label>
+        <input id="filtro-data" type="date" name="data" class="form-control">
     </div>
     <button class="btn btn-primario" type="submit">Filtrar</button>
     <a class="btn btn-secundario" href="{% url 'atendimentos:lista' %}">Limpar</a>

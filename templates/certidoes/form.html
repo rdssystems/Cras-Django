@@ -12,10 +12,7 @@
             {% csrf_token %}
             <div class="form-row">
                 {% for campo in form %}
-                <div class="campo">
-                    <label>{{ campo.label }}</label>
-                    {{ campo }}
-                </div>
+                {% include '_campo.html' with campo=campo %}
                 {% endfor %}
             </div>
             <div class="form-acoes">

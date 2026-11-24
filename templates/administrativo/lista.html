@@ -12,7 +12,8 @@
 </div>
 <form method="get" class="filtros">
     <div class="campo busca-input">
-        <input type="text" name="q" class="form-control" placeholder="Buscar por nome, CPF ou motivo…" value="{{ q }}">
+        <label for="busca-administrativo">Buscar registros</label>
+        <input id="busca-administrativo" type="text" name="q" class="form-control" placeholder="Buscar por nome, CPF ou motivo…" value="{{ q }}">
     </div>
     <button class="btn btn-primario" type="submit">
         <span class="material-symbols-outlined">search</span> Buscar

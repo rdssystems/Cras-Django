@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import render
 
 from .models import RegistroAdministrativo
@@ -7,6 +8,8 @@ from .models import RegistroAdministrativo
 
 @login_required
 def lista(request):
+    if not request.user.is_superuser:
+        raise PermissionDenied
     registros = RegistroAdministrativo.objects.all()
     q = request.GET.get('q', '').strip()
     if q:
