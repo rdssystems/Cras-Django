@@ -23,9 +23,17 @@ def registrar(request):
             if atendimento.status in STATUS_FILA:
                 fila = TipoFila(form.cleaned_data['tipo_fila']).label.lower()
                 prioridade = f' ({atendimento.etiqueta})' if atendimento.etiqueta else ''
-                messages.success(request, f'Senha Nº {atendimento.numero}: {atendimento.nome} entrou na fila de {fila}{prioridade}.')
+                messages.success(
+                    request,
+                    f'Senha Nº {atendimento.numero}: {atendimento.nome} entrou na fila de {fila}{prioridade}.',
+                    extra_tags='toast',
+                )
             else:
-                messages.success(request, f'{atendimento.nome} registrado(a) como resolvido(a) na triagem.')
+                messages.success(
+                    request,
+                    f'{atendimento.nome} registrado(a) como resolvido(a) na triagem.',
+                    extra_tags='toast',
+                )
             return redirect('triagem:registrar')
     else:
         form = AtendimentoForm()

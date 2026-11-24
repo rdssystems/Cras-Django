@@ -16,6 +16,7 @@
     </div>
 </div>
 
+<div class="grid-listas-chamada">
 {% for lista in listas %}
 <section class="card lista-chamada tone-{{ lista.tone }}" id="lista-{{ lista.chave }}">
     <div class="card-header">
@@ -33,7 +34,7 @@
     <div class="tabela-wrap">
         <table class="tabela tabela-chamada">
             <thead>
-                <tr><th>Ordem</th><th>Senha</th><th>Nome</th><th>Prioridade</th><th>Chegada</th><th>Espera</th><th></th></tr>
+                <tr><th>Ordem</th><th>Senha</th><th>Nome</th><th>Prioridade</th><th>Chegada</th><th></th></tr>
             </thead>
             <tbody>
                 {% for item in lista.itens %}
@@ -47,7 +48,6 @@
                         {% endif %}
                     </td>
                     <td>{{ item.hora_entrada|time:'H:i'|default:'—' }}</td>
-                    <td>{% if item.tempo_espera_min is not None %}{{ item.tempo_espera_min }} min{% else %}—{% endif %}</td>
                     <td class="acao">
                         {% if item.pode %}
                         <button class="btn btn-verde btn-sm" type="button" data-modal-abrir="#modal-atender-{{ item.id }}">
@@ -65,6 +65,7 @@
     {% endif %}
 </section>
 {% endfor %}
+</div>
 
 {% for lista in listas %}
     {% for item in lista.itens %}

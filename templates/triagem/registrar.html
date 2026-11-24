@@ -40,3 +40,13 @@
     </div>
 </div>
 {% endblock %}
+
+{% block scripts %}
+<script>
+document.querySelectorAll('[data-cpf]').forEach(function (campo) {
+    campo.addEventListener('input', function () {
+        campo.value = campo.value.replace(/\D/g, '').slice(0, 11);
+    });
+});
+</script>
+{% endblock %}

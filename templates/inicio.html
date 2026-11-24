@@ -65,61 +65,6 @@
     </div>
 </div>
 
-<div class="titulo-secao" id="filas">
-    <h2>Filas em andamento</h2>
-    <a class="btn btn-secundario btn-sm" href="{% url 'triagem:filas' %}">
-        <span class="material-symbols-outlined">list_alt</span> Ir para as filas
-    </a>
-</div>
-
-<div class="grid-filas">
-    {% for fila in filas %}
-    <div class="card fila-card tone-{{ fila.tone }}">
-        <div class="fila-header">
-            <div class="fila-cabecalho">
-                <span class="fila-titulo"><span class="fila-dot"></span>{{ fila.titulo }}</span>
-                <span class="fila-contador">{{ fila.count }} na fila</span>
-            </div>
-            {% if fila.espera_max is not None %}
-            <div class="fila-sub">
-                <span class="material-symbols-outlined" style="font-size:16px">schedule</span>
-                Espera máxima: {{ fila.espera_max }} min
-            </div>
-            {% endif %}
-        </div>
-        <div class="fila-corpo">
-            {% for item in fila.itens %}
-            <div class="fila-item{% if item.prioritario %} prioridade{% endif %}">
-                <div class="fila-item-topo">
-                    <span class="fila-senha">{{ forloop.counter }}º · Nº {{ item.numero }}</span>
-                    {% if item.etiqueta %}
-                    <span class="badge-pill {% if item.prioritario %}badge-ambar{% else %}badge-neutro{% endif %}"><span class="dot"></span>{{ item.etiqueta }}</span>
-                    {% else %}
-                    <span class="badge-pill badge-neutro">Normal</span>
-                    {% endif %}
-                </div>
-                <span class="fila-nome">{{ item.nome }}</span>
-                <div class="fila-item-rodape">
-                    <span>Chegada: {{ item.hora_entrada|time:'H:i' }}</span>
-                    <span class="fila-espera">Espera: {{ item.tempo_espera_min }} min</span>
-                </div>
-            </div>
-            {% empty %}
-            <div class="fila-vazia">
-                <span class="material-symbols-outlined">mood</span>
-                Ninguém aguardando.
-            </div>
-            {% endfor %}
-        </div>
-        {% if fila.count %}
-        <div class="fila-rodape">
-            <a href="{% url 'triagem:filas' %}#lista-{{ fila.chave }}">{% if fila.count == 1 %}Ver na fila{% else %}Ver todos os {{ fila.count }} na fila{% endif %}</a>
-        </div>
-        {% endif %}
-    </div>
-    {% endfor %}
-</div>
-
 {% for secao in secoes_graficos %}
 <section class="secao-graficos" aria-labelledby="secao-{{ forloop.counter }}">
     <header class="secao-cabecalho">

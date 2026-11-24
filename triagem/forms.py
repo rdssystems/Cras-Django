@@ -23,8 +23,36 @@ class AtendimentoForm(forms.ModelForm):
         fields = ['nome', 'cpf']
         widgets = {
             'nome': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome completo', 'autofocus': True}),
-            'cpf': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '000.000.000-00'}),
+            'cpf': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': '00000000000',
+                'inputmode': 'numeric',
+                'maxlength': '11',
+                'pattern': '[0-9]{11}',
+                'data-cpf': '',
+                'title': 'Digite os 11 números do CPF, sem pontos ou traços.',
+            }),
         }
+
+    def clean_cpf(self):
+        cpf = self.cleaned_data.get('cpf', '').strip()
+        if not cpf:
+            return ''
+        if not cpf.isascii() or not cpf.isdigit():
+            raise forms.ValidationError('Digite somente números, sem pontos ou traços.')
+        if len(cpf) != 11:
+            raise forms.ValidationError('O CPF deve ter exatamente 11 números.')
+        if len(set(cpf)) == 1:
+            raise forms.ValidationError('Informe um CPF válido.')
+
+        numeros = [int(digito) for digito in cpf]
+        primeiro = 11 - sum(numeros[indice] * (10 - indice) for indice in range(9)) % 11
+        primeiro = 0 if primeiro >= 10 else primeiro
+        segundo = 11 - sum(numeros[indice] * (11 - indice) for indice in range(10)) % 11
+        segundo = 0 if segundo >= 10 else segundo
+        if numeros[9:] != [primeiro, segundo]:
+            raise forms.ValidationError('Informe um CPF válido.')
+        return cpf
 
     def save(self, commit=True):
         atendimento = super().save(commit=False)
