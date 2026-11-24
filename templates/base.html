@@ -29,9 +29,6 @@
         <a class="sidebar-link {% if request.resolver_match.view_name == 'triagem:registrar' %}ativo{% endif %}" href="{% url 'triagem:registrar' %}">
             <span class="material-symbols-outlined" aria-hidden="true">person_add</span> Nova Triagem
         </a>
-        <a class="sidebar-link {% if request.resolver_match.view_name == 'triagem:controle' %}ativo{% endif %}" href="{% url 'triagem:controle' %}">
-            <span class="material-symbols-outlined" aria-hidden="true">fact_check</span> Controle Diário
-        </a>
         <details class="menu-gestao">
         <summary class="sidebar-link {% if request.resolver_match.view_name|startswith:'atendimentos' or request.resolver_match.view_name|startswith:'certidoes' or request.resolver_match.view_name|startswith:'dsf' or request.resolver_match.view_name|startswith:'tap' %}ativo{% endif %}"><span class="material-symbols-outlined" aria-hidden="true">folder</span> Gestão <span class="material-symbols-outlined seta-menu" aria-hidden="true">expand_more</span></summary>
         <div class="menu-gestao-itens">
