@@ -13,23 +13,43 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 
+from django.core.exceptions import ImproperlyConfigured
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
+def env_lista(nome, padrao=''):
+    return [item.strip() for item in os.environ.get(nome, padrao).split(',') if item.strip()]
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-v_62k+_(va(#2v)@zs8pvyaeg=%+qt2b1pa$h6ggf54&pia31+'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Sem variáveis de ambiente, vale o modo de desenvolvimento (DEBUG e chave pública abaixo).
+# Em produção (compose.prod.yaml + .env) DJANGO_DEBUG=False e DJANGO_SECRET_KEY é obrigatória.
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
+
+CHAVE_DE_DESENVOLVIMENTO = 'django-insecure-v_62k+_(va(#2v)@zs8pvyaeg=%+qt2b1pa$h6ggf54&pia31+'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY') or (CHAVE_DE_DESENVOLVIMENTO if DEBUG else '')
+if not SECRET_KEY:
+    raise ImproperlyConfigured('Defina DJANGO_SECRET_KEY: com DJANGO_DEBUG=False a chave pública não é usada.')
 
 ALLOWED_HOSTS = os.environ.get(
     'DJANGO_ALLOWED_HOSTS',
     'localhost,127.0.0.1,192.168.100.179,testserver,isaque',
 ).split(',')
+
+# Endereço público (ex.: https://servidor-test.taile3dafe.ts.net:10000), com porta, para o login funcionar.
+CSRF_TRUSTED_ORIGINS = env_lista('DJANGO_CSRF_TRUSTED_ORIGINS')
+
+if not DEBUG:
+    # O container só escuta em 127.0.0.1; quem chega é o proxy HTTPS do Tailscale Funnel.
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_REFERRER_POLICY = 'same-origin'
+    # W004 (HSTS): o host do Funnel é compartilhado com outros apps (Naicas, Jellyfin); HSTS valeria para todos.
+    # W008 (SSL redirect): o Funnel só aceita HTTPS e o container não é exposto; redirecionar aqui é inútil.
+    SILENCED_SYSTEM_CHECKS = ['security.W004', 'security.W008']
 
 
 # Application definition
@@ -58,6 +78,7 @@ LOGOUT_REDIRECT_URL = 'login'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # serve os estáticos em produção (gunicorn)
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -92,7 +113,8 @@ WSGI_APPLICATION = 'cras.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        # Em produção o banco fica numa pasta montada (os arquivos -wal/-shm do SQLite ficam juntos).
+        'NAME': os.environ.get('DJANGO_DB_PATH') or BASE_DIR / 'db.sqlite3',
         'OPTIONS': {
             'timeout': 20,
             'init_command': 'PRAGMA journal_mode=WAL',
@@ -136,6 +158,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+STORAGES = {
+    'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+    # Sem "Manifest": o cache-busting já é feito pela tag {% static_v %} (?v=<mtime>).
+    'staticfiles': {'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage'},
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

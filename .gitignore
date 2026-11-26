@@ -31,3 +31,6 @@ media/
 .idea/
 Thumbs.db
 .DS_Store
+
+# Banco de produção (VPS) e estáticos coletados
+dados/

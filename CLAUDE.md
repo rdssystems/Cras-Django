@@ -30,21 +30,29 @@ O atendimento é **só presencial**: não existe agendamento online, que foi rem
 
 | Item | Valor |
 |---|---|
-| Python / Django | 3.12.3 / 5.2.8 (ambiente global, **sem `requirements.txt`** e sem venv) |
-| Outras libs | `openpyxl` 3.1.5 (só para o importador da planilha) |
-| Banco | SQLite (`db.sqlite3`, **com dados reais**: ver seção 7) |
-| Front | Templates Django + CSS próprio. Sem framework JS. **Apache ECharts 6.1.0** servido localmente, só no Painel |
-| Fontes | Google Fonts (Inter, Plus Jakarta Sans, Material Symbols Outlined); dependem de internet |
+| Python / Django | 3.12 / **6.1.2**, versões fixadas em `requirements.txt` (com `openpyxl`, `gunicorn` e `whitenoise`) |
+| Ambiente local | `.venv` na pasta do projeto (ignorado pelo git). O Python global da máquina tem Django 5.2 e **não** tem whitenoise: não rode o projeto por ele |
+| Banco | SQLite em modo WAL (`db.sqlite3` local, **com dados reais**: ver seção 7). Em produção, o caminho vem de `DJANGO_DB_PATH` |
+| Front | Templates Django + CSS próprio (`tema.css`), Bootstrap 5.3 e Bootstrap Icons via CDN. **Apache ECharts 6.1.0** servido localmente, só no Painel |
+| Fontes | Google Fonts: Lexend (texto), Kalam (fita da marca), Material Symbols Outlined. Dependem de internet |
 | Idioma / fuso | `pt-br` / `America/Sao_Paulo`, `USE_TZ=True` |
 | Usuário | `AUTH_USER_MODEL = 'usuarios.Usuario'` |
 
 ```bash
-python manage.py migrate
-python manage.py runserver 127.0.0.1:8030   # nesta máquina as portas 80, 3005, 5432-5436, 8000, 8001, 8020, 8080 e 8081 são do Docker
-python manage.py test                       # 52 testes
+python -m venv .venv && .venv/Scripts/python -m pip install -r requirements.txt   # uma vez
+.venv/Scripts/python manage.py migrate
+.venv/Scripts/python manage.py runserver 127.0.0.1:8030   # nesta máquina 80, 3005, 5432-5436, 8000, 8001, 8020, 8080 e 8081 são do Docker
+.venv/Scripts/python manage.py test
 ```
 
-`DEBUG = True`, `SECRET_KEY` de desenvolvimento fixa no `settings.py` (pública no GitHub) e sem `STATIC_ROOT`. **Ainda não está pronto para produção** (ver seção 12).
+Outras formas de rodar:
+- **Docker de desenvolvimento:** `compose.yaml`, com `runserver` na porta 8031 e o `db.sqlite3` local montado. É o caminho do README e do Isaque.
+- **Produção:** `compose.prod.yaml`, com gunicorn, configurado por `.env`. Ver a seção 7.1.
+
+**Configuração por ambiente** (`cras/settings.py`):
+- Sem variáveis, vale o modo de desenvolvimento: `DEBUG` ligado e chave pública `django-insecure-…`.
+- Com `DJANGO_DEBUG=False`, a `DJANGO_SECRET_KEY` é **obrigatória** (sem ela o sistema não sobe), os cookies ficam `Secure` e os estáticos são servidos pelo whitenoise.
+- Outras variáveis: `DJANGO_ALLOWED_HOSTS`, `DJANGO_CSRF_TRUSTED_ORIGINS` (com a porta) e `DJANGO_DB_PATH`. O modelo está em `.env.example`.
 
 ## 3. Estrutura
 
@@ -136,9 +144,10 @@ Pontos do modelo de dados:
 
 ## 6. Front-end: convenções
 
+- **Padrão visual da Secretaria** (desde 24/11/2026): siga o [front-rules.md](front-rules.md), que é o manual comum aos sistemas (referência: Naicas).
 - **Tema:** tudo em [cras/static/cras/css/tema.css](cras/static/cras/css/tema.css).
-  - Os tokens ficam em `:root` (`--primary` `#0f766e`, `--secondary` `#d97706`, `--tertiary` `#3b82f6`…).
-  - Títulos em Plus Jakarta Sans e texto em Inter.
+  - Um segundo bloco `:root` aplica a paleta da Secretaria sobre os tokens antigos: `--cor-primaria` anil `#2b3a8c`, `--cor-critica` urucum `#c8471f`, `--cor-atencao` ipê `#f2b705`, `--cor-sucesso` folha `#2e7a4c` e `--cor-fundo` `#f3f4f8`.
+  - Fonte Lexend; a marca é a "fita" `marca-fita` (Kalam). A navegação fica numa barra superior, com o menu "Gestão" recolhível.
   - Não há modo escuro.
 - **CSS e JS próprios sempre com `{% static_v 'caminho' %}`** (`cras_extras`), que acrescenta `?v=<mtime>`. Sem isso, o navegador usa o arquivo velho do cache e a página aparece quebrada (aconteceu em 23/11/2026).
 - **Campos de formulário:** use `{% include '_campo.html' with campo=form.x %}`, que mostra rótulo, asterisco de obrigatório e erros, e também trata checkbox. Os forms com `novalidate` mostram os erros do Django.
@@ -168,6 +177,26 @@ Pontos do modelo de dados:
   - Avise o usuário antes de qualquer uso real, exportação ou relatório.
   - Para limpar: `python manage.py demo_triagens --remover`.
 - **Antes de mudar o schema ou rodar comandos que escrevem no banco:** faça uma cópia do `db.sqlite3` fora do projeto.
+- **O banco da VPS é outro**, separado do local. Ele começou **vazio** em 26/11/2026, por decisão do usuário. Nunca copie o banco local (com dados reais e com a demonstração) para a VPS sem o usuário pedir.
+
+### 7.1 Produção (VPS, desde 26/11/2026)
+
+- **Endereço público:** https://servidor-test.taile3dafe.ts.net:10000, pelo **Tailscale Funnel** (público na internet).
+  - No mesmo host, a 443 é o Naicas e a 8443 é o Jellyfin. A 10000 era a última porta de Funnel livre.
+- **Servidor:** `servidor-test` (ZimaOS), alcançado pelo IP do Tailscale. O usuário e a senha do SSH ficam com o usuário e não são registrados em lugar nenhum.
+  - Docker exige `sudo` (com senha).
+  - O OpenSSH 10 de lá bloqueia por alguns segundos quem errou o login (PerSourcePenalties). Espere e tente de novo; não fique testando usuários.
+- **Pasta:** `/DATA/AppData/Cras-django`, um `git clone` do GitHub, como o Naicas.
+  - `.env` com `chmod 600`, chave própria gerada no servidor.
+  - O banco fica em `dados/db.sqlite3`, uma pasta montada inteira por causa dos arquivos do WAL.
+- **Container:** `cras-app` (`compose.prod.yaml`), escutando só em `127.0.0.1:8031`.
+  - Ao subir, roda `migrate`, `collectstatic` e gunicorn com 3 workers.
+- **Funnel:** `docker exec tailscale tailscale funnel --bg --https=10000 http://127.0.0.1:8031`.
+  - O Tailscale roda no container `tailscale`, com rede do host.
+  - Para ver a configuração: `docker exec tailscale tailscale funnel status`.
+- **Atualizar:** `cd /DATA/AppData/Cras-django && git pull && sudo docker compose -f compose.prod.yaml up -d --build`.
+- **Logs:** `sudo docker logs -f cras-app`.
+- **Verificar de fora sem SSH:** `nslookup servidor-test.taile3dafe.ts.net 1.1.1.1` e `curl --resolve servidor-test.taile3dafe.ts.net:10000:<IP público do relay> https://servidor-test.taile3dafe.ts.net:10000/login/`.
 
 ## 8. Comandos de gestão
 
@@ -179,7 +208,9 @@ Pontos do modelo de dados:
 
 ## 9. Testes
 
-`python manage.py test` → **52 testes, todos passando** (23/11/2026):
+`.venv/Scripts/python manage.py test` → **52 testes, 51 passando** (26/11/2026).
+
+A falha é `test_sao_duas_filas_administrativa_e_psicossocial`: o commit `c1c2cae` (24/11) tirou do Painel os cards das duas filas, e o teste ainda os procura. Falta o usuário decidir entre ajustar o teste e devolver as filas ao Painel (seção 12).
 
 | Arquivo | O que cobre |
 |---|---|
@@ -198,6 +229,8 @@ Certidões, administrativo e a lista de atendimentos ainda não têm testes. Tod
   `python -c "import django,os,sys; sys.path.insert(0,'.'); os.environ['DJANGO_SETTINGS_MODULE']='cras.settings'; django.setup(); ..."`
 - **Arquivos com aspas e acentos:** heredoc no Bash já falhou com esse conteúdo. Prefira a ferramenta de escrita de arquivos.
 - **Migrações:** são aplicadas na hora com `migrate`. Mudança no `settings.py` exige reiniciar o `runserver`.
+- **Python:** use sempre o do `.venv` (`.venv/Scripts/python`). O global não tem as dependências do `requirements.txt`.
+- **Servidor esquecido rodando:** um `runserver` de uma sessão anterior pode continuar ocupando a 8030, e o recarregador troca o PID do processo filho a cada mudança de arquivo. Para encontrá-lo: `Get-NetTCPConnection -LocalPort 8030 -State Listen` e, depois, o `ParentProcessId` do processo.
 - **Screenshots para conferir telas:**
   - Use `playwright-core` (npm, numa pasta temporária fora do projeto) com `channel: 'msedge'`; o Python daqui não tem playwright.
   - Para logar, crie uma sessão por `SessionStore` / `force_login` e **apague a sessão depois**.
@@ -215,6 +248,8 @@ Certidões, administrativo e a lista de atendimentos ainda não têm testes. Tod
 | 23/11/2026 | Triagem com tipo de fila + prioridade; Painel com duas filas; motivos de múltipla escolha; benefício do DSF como lista de seleção. |
 | 23/11/2026 | A caixa "Resolvido na própria triagem" e a saída de `REUNIÃO` da triagem foram escolhas do agente para não perder funções; confirmar se o usuário questionar. |
 | 23/11/2026 | Código publicado no GitHub (repositório público), sem os dados reais. |
+| 24/11/2026 | Commits do Isaque Miranda, colaborador:<br>• identidade visual da Secretaria (`front-rules.md`);<br>• Docker de desenvolvimento e `requirements.txt` com Django 6.1.2;<br>• validação do CPF na triagem (11 números e dígitos verificadores);<br>• Controle diário fora do menu principal, como aba do Painel;<br>• Painel sem os cards das filas. |
+| 26/11/2026 | Deploy na VPS com **banco vazio** e acesso **público pelo Funnel (porta 10000)**; ajustes de produção commitados no GitHub (seção 7.1). |
 
 ## 12. Pendências (próximos passos)
 
@@ -223,17 +258,21 @@ Certidões, administrativo e a lista de atendimentos ainda não têm testes. Tod
    - O Administrativo continua vendo os nomes da fila psicossocial.
    - "Atendimento psicossocial" só pode ser registrado por Psicólogo(a) ou Assistente Social.
    - Falta definir quem acessa Certidões, DSF, TAP e Histórico (que tem CPF).
-2. **Paginação em `/atendimentos/`** (B6): com 675 registros a página tem 61 mil px e leva 1,6 s.
-3. **Controle diário com dia cheio** (B12): a tabela estoura o card e o CPF e os nomes quebram em várias linhas.
-4. **Produção** (B2): `SECRET_KEY` e `DEBUG` por variável de ambiente (a chave atual está pública), `requirements.txt`, `STATIC_ROOT` e `ALLOWED_HOSTS`.
-5. **Registro inválido C1:** um `RegistroAtendimento` de importação com nome vazio. Decidir se apaga.
-6. **Indicador "Atendidos"** (B9): decidir se conta os resolvidos na triagem.
-7. **Atualização automática das filas** (B7), por exemplo recarregar a cada 30 s.
+2. **Teste das filas no Painel:** ajustar o teste ou devolver as filas ao Painel (seção 9).
+3. **Backup do banco da VPS:** ainda não existe rotina. O Naicas tem uma (`backups/`, `instalar_auto_update.sh`), que pode servir de modelo.
+4. **Paginação em `/atendimentos/`** (B6): com 675 registros a página tem 61 mil px e leva 1,6 s.
+5. **Controle diário com dia cheio** (B12): a tabela estoura o card e o CPF e os nomes quebram em várias linhas.
+6. **Registro inválido C1:** um `RegistroAtendimento` de importação com nome vazio. Decidir se apaga.
+7. **Indicador "Atendidos"** (B9): decidir se conta os resolvidos na triagem.
+8. **Atualização automática das filas** (B7), por exemplo recarregar a cada 30 s.
+
+A configuração de produção (B2) foi feita em 26/11/2026: settings por ambiente, gunicorn, whitenoise e `compose.prod.yaml`.
 
 ## 13. Checklist ao terminar uma tarefa
 
-- [ ] `python manage.py test` passando, com testes novos para a regra nova.
-- [ ] `python manage.py makemigrations --check` sem pendências, e `migrate` aplicado.
+- [ ] `.venv/Scripts/python manage.py test` passando, com testes novos para a regra nova.
+- [ ] `.venv/Scripts/python manage.py makemigrations --check` sem pendências, e `migrate` aplicado.
+- [ ] Se a mudança precisa ir para produção: commit e push (só com o OK do usuário), depois o "Atualizar" da seção 7.1.
 - [ ] Telas conferidas (screenshot) quando houver mudança visual.
 - [ ] **Este CLAUDE.md atualizado** (regras, decisões, pendências, contagem de testes) e o MAPA, se for o caso.
 - [ ] Nada de dado real ou segredo novo no que vai para o git.

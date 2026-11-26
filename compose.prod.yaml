@@ -1,0 +1,21 @@
+# Produção (VPS). Desenvolvimento continua no compose.yaml.
+#   cp .env.example .env   (e preencha)
+#   docker compose -f compose.prod.yaml up -d --build
+# O container só escuta em 127.0.0.1:8031; o acesso público é pelo Tailscale Funnel (porta 10000).
+services:
+  cras:
+    build: .
+    container_name: cras-app
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DJANGO_DB_PATH: /app/dados/db.sqlite3
+    command: >
+      sh -c "python manage.py migrate --noinput
+      && python manage.py collectstatic --noinput
+      && gunicorn cras.wsgi:application --bind 0.0.0.0:8031 --workers 3 --timeout 60 --access-logfile -"
+    ports:
+      - "127.0.0.1:8031:8031"
+    volumes:
+      # Pasta inteira (e não só o arquivo): o SQLite em modo WAL precisa dos arquivos -wal/-shm ao lado.
+      - ./dados:/app/dados
