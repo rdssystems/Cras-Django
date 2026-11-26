@@ -50,11 +50,13 @@
                     <td>
                         {% if d.resultado == 'DEFERIDO' %}
                         <span class="badge-pill badge-verde"><span class="dot"></span>{{ d.get_resultado_display }}</span>
-                        {% else %}
+                        {% elif d.resultado == 'INDEFERIDO' %}
                         <span class="badge-pill badge-vermelho"><span class="dot"></span>{{ d.get_resultado_display }}</span>
+                        {% else %}
+                        —{# importado da planilha sem resultado #}
                         {% endif %}
                     </td>
-                    <td>{{ d.tecnico_responsavel|default:'—' }}</td>
+                    <td>{{ d.tecnico_nome|default:'—' }}</td>
                 </tr>
                 {% empty %}
                 <tr><td colspan="5"><div class="vazio"><span class="material-symbols-outlined">task</span>Nenhum DSF registrado.<br><a class="btn btn-primario mt-2" href="{% url 'dsf:criar' %}">Registrar primeiro DSF</a></div></td></tr>

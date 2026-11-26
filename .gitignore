@@ -34,3 +34,6 @@ Thumbs.db
 
 # Banco de produção (VPS) e estáticos coletados
 dados/
+
+# Configuração pessoal do Claude Code (permissões locais)
+.claude/settings.local.json

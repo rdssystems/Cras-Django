@@ -31,7 +31,7 @@
                     <td><strong>{{ c.quem_solicitou }}</strong></td>
                     <td>{{ c.de_quem }}</td>
                     <td>{{ c.telefone|default:'—' }}</td>
-                    <td>{{ c.servidor|default:'—' }}</td>
+                    <td>{{ c.servidor_nome|default:'—' }}</td>
                     <td>{{ c.cidade|default:'—' }}</td>
                     <td>
                         {% if c.data_recebimento %}

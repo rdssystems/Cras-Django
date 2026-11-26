@@ -20,6 +20,8 @@ class Dsf(models.Model):
         settings.AUTH_USER_MODEL, verbose_name='Técnico responsável',
         on_delete=models.SET_NULL, null=True, blank=True, related_name='dsfs'
     )
+    # Nome do técnico como estava escrito na planilha (sem conta no sistema).
+    tecnico_legado = models.CharField('Técnico responsável (histórico)', max_length=200, blank=True)
 
     class Meta:
         ordering = ['-data']
@@ -28,3 +30,7 @@ class Dsf(models.Model):
 
     def __str__(self):
         return f'{self.nome} - {self.get_beneficio_solicitado_display()}'
+
+    @property
+    def tecnico_nome(self):
+        return str(self.tecnico_responsavel) if self.tecnico_responsavel_id else self.tecnico_legado

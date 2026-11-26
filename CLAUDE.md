@@ -124,6 +124,8 @@ Pontos do modelo de dados:
 
 ### 4.6 Outros módulos
 - **DSF:** *Benefício solicitado* é uma escolha entre `Dsf.Beneficio`: Cesta Básica, Fralda e Absorvente.
+  - O técnico é a conta de quem cadastrou (`tecnico_responsavel`) ou o nome vindo da planilha (`tecnico_legado`). As telas usam `tecnico_nome`.
+- **Certidões:** o servidor é a conta (`servidor`) ou o nome vindo da planilha (`servidor_legado`). As telas usam `servidor_nome`. Há também um campo livre de `observacoes`.
 - **Indicador "Atendidos" do Painel:** conta só `ATENDIDO`, sem os resolvidos na triagem. É uma decisão de negócio em aberto (B9 no MAPA).
 
 ## 5. Painel e gráficos
@@ -172,12 +174,16 @@ Pontos do modelo de dados:
 - **Git da pasta pessoal:** a pasta do projeto fica dentro de um repositório git acidental na pasta pessoal do usuário.
   - Rode git **sempre de dentro da pasta do projeto**, que tem `.git` próprio.
   - Nunca faça `git add -A` a partir da pasta pessoal.
-- **Commit e push só quando o usuário pedir.**
+- **Commit e push: liberados** (autorização permanente do usuário, 26/11/2026).
+  - Commite e envie ao terminar cada mudança testada, e depois atualize a VPS quando a mudança for para produção.
+  - A permissão fica em `.claude/settings.local.json` (local, fora do git).
+  - Continue conferindo o que entra no commit: nada de dados reais, `.env` ou o `klisman-note` local do `settings.py`.
 - **Demonstração no banco:** desde 23/11/2026 o banco local tem **dados fictícios de demonstração** (`demo_triagens`).
   - Avise o usuário antes de qualquer uso real, exportação ou relatório.
   - Para limpar: `python manage.py demo_triagens --remover`.
 - **Antes de mudar o schema ou rodar comandos que escrevem no banco:** faça uma cópia do `db.sqlite3` fora do projeto.
-- **O banco da VPS é outro**, separado do local. Ele começou **vazio** em 26/11/2026, por decisão do usuário. Nunca copie o banco local (com dados reais e com a demonstração) para a VPS sem o usuário pedir.
+- **O banco da VPS é outro**, separado do local. Ele começou vazio em 26/11/2026 e, no mesmo dia, recebeu a planilha atual do CRAS Morumbi (`BANCO DE DADOS MORUMBI.xlsx`, a pedido do usuário). Nunca copie o banco local (com dados antigos e com a demonstração) para a VPS sem o usuário pedir.
+- **Planilhas:** toda planilha `.xlsx` na pasta tem dados reais e fica fora do git. Depois de importada na VPS, o arquivo é apagado de lá.
 
 ### 7.1 Produção (VPS, desde 26/11/2026)
 
@@ -202,13 +208,28 @@ Pontos do modelo de dados:
 
 | Comando | O que faz |
 |---|---|
-| `importar_planilha` | Importa a planilha para `RegistroAdministrativo`, `TapDiario`, `RegistroAtendimento` e `Atendimento`. **Já foi rodado.** Recusa rodar de novo sem `--forcar`, porque reimportar **duplica** os dados (só o TAP usa `update_or_create`). |
+| `importar_planilha --arquivo <xlsx>` | Importa a planilha do CRAS: histórico 1S2024 (`RegistroAdministrativo`), controle diário (`Atendimento`), Registro de Atendimentos, TAP 2026, **Certidões** e **DSF**. Detalhes abaixo. |
 | `demo_triagens` | Apaga a demonstração anterior e cria cerca de 950 triagens fictícias: 30 dias úteis sem feriados nacionais, mais hoje com cerca de 28 pessoas na fila. Também cria 7 servidores `demo_*` sem senha. A espera de "hoje" é contada a partir da hora em que o comando roda. |
 | `demo_triagens --remover` | Apaga só o que está ligado aos usuários `demo_*`, sem tocar em dados reais. |
 
+**Como o `importar_planilha` funciona:**
+- **Tudo ou nada:** roda numa transação única. Se algo falhar, o banco fica como estava.
+- **Trava:** recusa rodar se já houver histórico importado, porque reimportar **duplica** os dados (só o TAP usa `update_or_create`). Para forçar, use `--forcar`.
+- **Já rodado:** no banco local, com a planilha antiga; na VPS, em 26/11/2026, com `BANCO DE DADOS MORUMBI.xlsx`.
+- **Motivos:** as 4 colunas de motivo viram a lista separada por `; `, como na múltipla escolha. Os textos ficam como estão na planilha, sem trocar pela lista oficial.
+- **Certidões:**
+  - quando a coluna de data traz texto (ex.: "entregue para a mãe em 20/02/2026"), o importador usa a primeira data do texto e guarda o texto inteiro em `observacoes`;
+  - datas digitadas na coluna de nome viram texto `dd/mm/aaaa`;
+  - o nome do servidor vai para `servidor_legado`;
+  - linhas sem data de solicitação são ignoradas.
+- **DSF:**
+  - "CESTA BÁSICA - DSF" vira `CESTA BÁSICA`;
+  - o nome do técnico vai para `tecnico_legado`;
+  - sem resultado na planilha, fica `''` e a lista mostra "—", sem inventar "deferido".
+
 ## 9. Testes
 
-`.venv/Scripts/python manage.py test` → **52 testes, 51 passando** (26/11/2026).
+`.venv/Scripts/python manage.py test` → **56 testes, 55 passando** (26/11/2026).
 
 A falha é `test_sao_duas_filas_administrativa_e_psicossocial`: o commit `c1c2cae` (24/11) tirou do Painel os cards das duas filas, e o teste ainda os procura. Falta o usuário decidir entre ajustar o teste e devolver as filas ao Painel (seção 12).
 
@@ -250,6 +271,8 @@ Certidões, administrativo e a lista de atendimentos ainda não têm testes. Tod
 | 23/11/2026 | Código publicado no GitHub (repositório público), sem os dados reais. |
 | 24/11/2026 | Commits do Isaque Miranda, colaborador:<br>• identidade visual da Secretaria (`front-rules.md`);<br>• Docker de desenvolvimento e `requirements.txt` com Django 6.1.2;<br>• validação do CPF na triagem (11 números e dígitos verificadores);<br>• Controle diário fora do menu principal, como aba do Painel;<br>• Painel sem os cards das filas. |
 | 26/11/2026 | Deploy na VPS com **banco vazio** e acesso **público pelo Funnel (porta 10000)**; ajustes de produção commitados no GitHub (seção 7.1). |
+| 26/11/2026 | O banco local é antigo. A planilha atual do CRAS Morumbi foi importada direto na VPS, com o importador ampliado para Certidões e DSF. Multiunidade (ex.: "CRAS Morumbi") ficou para depois. |
+| 26/11/2026 | Commit e push liberados de forma permanente: o agente commita, envia e atualiza a VPS sem pedir. |
 
 ## 12. Pendências (próximos passos)
 
@@ -259,6 +282,10 @@ Certidões, administrativo e a lista de atendimentos ainda não têm testes. Tod
    - "Atendimento psicossocial" só pode ser registrado por Psicólogo(a) ou Assistente Social.
    - Falta definir quem acessa Certidões, DSF, TAP e Histórico (que tem CPF).
 2. **Teste das filas no Painel:** ajustar o teste ou devolver as filas ao Painel (seção 9).
+2.1. **Lista oficial de motivos desatualizada:** `RegistroAtendimento.MOTIVOS` (o que o *Atender* oferece) veio da planilha de 2024.
+   - A planilha atual usa outros motivos: Atualização de cadastro, Orientações triagem, Cadastro novo, Atendimento descumprimento de condicionalidade, Orientações BPC, Entrevista domiciliar, Orientações psicossocial, Carteirinha do idoso, Pró-Pão, Visita domiciliar, Solicitação de cesta básica, entre outros.
+   - Falta o usuário confirmar a lista nova.
+2.2. **TAP 2026:** a planilha importada não tinha nenhum valor diário, só a linha TOTAL zerada.
 3. **Backup do banco da VPS:** ainda não existe rotina. O Naicas tem uma (`backups/`, `instalar_auto_update.sh`), que pode servir de modelo.
 4. **Paginação em `/atendimentos/`** (B6): com 675 registros a página tem 61 mil px e leva 1,6 s.
 5. **Controle diário com dia cheio** (B12): a tabela estoura o card e o CPF e os nomes quebram em várias linhas.
@@ -272,7 +299,7 @@ A configuração de produção (B2) foi feita em 26/11/2026: settings por ambien
 
 - [ ] `.venv/Scripts/python manage.py test` passando, com testes novos para a regra nova.
 - [ ] `.venv/Scripts/python manage.py makemigrations --check` sem pendências, e `migrate` aplicado.
-- [ ] Se a mudança precisa ir para produção: commit e push (só com o OK do usuário), depois o "Atualizar" da seção 7.1.
+- [ ] Commit e push (liberados, seção 7). Se a mudança vai para produção, depois o "Atualizar" da seção 7.1.
 - [ ] Telas conferidas (screenshot) quando houver mudança visual.
 - [ ] **Este CLAUDE.md atualizado** (regras, decisões, pendências, contagem de testes) e o MAPA, se for o caso.
 - [ ] Nada de dado real ou segredo novo no que vai para o git.

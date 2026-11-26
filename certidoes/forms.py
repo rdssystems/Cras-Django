@@ -9,7 +9,7 @@ class CertidaoForm(forms.ModelForm):
         fields = [
             'data_solicitacao', 'quem_solicitou', 'de_quem', 'telefone',
             'cidade', 'data_recebimento', 'nome_contato', 'contato_em',
-            'data_entrega', 'entregue_para',
+            'data_entrega', 'entregue_para', 'observacoes',
         ]
         widgets = {
             'data_solicitacao': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
@@ -22,4 +22,5 @@ class CertidaoForm(forms.ModelForm):
             'contato_em': forms.TextInput(attrs={'class': 'form-control'}),
             'data_entrega': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'entregue_para': forms.TextInput(attrs={'class': 'form-control'}),
+            'observacoes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }

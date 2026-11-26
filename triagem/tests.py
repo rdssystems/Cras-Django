@@ -14,6 +14,8 @@ from django.utils import timezone
 
 from administrativo.models import RegistroAdministrativo
 from atendimentos.models import RegistroAtendimento
+from certidoes.models import Certidao
+from dsf.models import Dsf
 from tap.models import TapDiario
 from usuarios.models import Usuario
 
@@ -306,6 +308,70 @@ class ImportarPlanilhaTests(TestCase):
 
         self.importar(forcar=True)
         self.assertEqual(RegistroAdministrativo.objects.count(), 2)
+
+    def _planilha_completa(self):
+        """Planilha como a atual do CRAS Morumbi: motivos em várias colunas, Certidões e DSF."""
+        wb = openpyxl.load_workbook(self.caminho)
+        reg = wb['REGISTRO DE ATENDIMENTOS']
+        reg.append([datetime(2026, 11, 20), 'CARLA', '444', time(10, 0), None, 'ATENDIMENTO ADMINISTRATIVO',
+                    'ATUALIZAÇÃO DE CADASTRO', 'CARTEIRINHA DO IDOSO', None, None, 'NICOLLI', ''])
+
+        cert = wb.create_sheet('CERTIDÕES')
+        cert.append(['DATA SOLICITAÇÃO', 'QUEM SOLICITOU', 'DE QUEM', 'TELEFONE', 'SERVIDOR', 'CIDADE',
+                     'DATA RECEBIMENTO', 'NOME DO CONTATO', 'CONTATO EM:', 'DATA ENTREGA', 'ENTREGUE PARA:'])
+        cert.append([None] * 11)  # a planilha real tem a linha 2 em branco
+        cert.append([datetime(2026, 1, 5), 'DORA', 'DO MESMO', 34999990000.0, 'GUSTAVO', 'UBERLANDIA-MG',
+                     '12/02/2026', datetime(2026, 2, 13), 'TELEFONE', 'ENTREGUE PARA A MÃE EM 20/02/2026', None])
+        cert.append(['05/01//2026', 'EDU', 'FILHO', None, 'NICOLLI', 'ARAGUARI', None, None, None, None, None])
+        cert.append(['SEM DATA', 'FABI', 'DELA', None, None, None, None, None, None, None, None])
+
+        dsf = wb.create_sheet('DSF CONCLUÍDO')
+        dsf.append(['DSF CONCLUÍDO'])
+        dsf.append(['NOME', 'BENEFÍCIO SOLICITADO', 'DATA', 'DEFERIDO/ INDEFERIDO', 'TÉCNICO RESPONSÁVEL'])
+        dsf.append(['GABI', 'CESTA BÁSICA - DSF', datetime(2026, 11, 3), 'DEFERIDO', 'PATRICIA'])
+        dsf.append(['HELO', 'CESTA BÁSICA - DSF', datetime(2026, 11, 4), None, 'ALESSANDRA'])
+        wb.save(self.caminho)
+
+    def test_motivos_das_varias_colunas_viram_lista(self):
+        self._planilha_completa()
+        self.importar()
+        carla = RegistroAtendimento.objects.get(nome='CARLA')
+        self.assertEqual(carla.motivos, ['ATUALIZAÇÃO DE CADASTRO', 'CARTEIRINHA DO IDOSO'])
+        self.assertEqual(carla.responsavel_nome, 'NICOLLI')
+
+    def test_certidoes_sem_perder_o_texto_das_colunas_de_data(self):
+        self._planilha_completa()
+        self.importar()
+        self.assertEqual(Certidao.objects.count(), 2)  # a linha sem data de solicitação foi ignorada
+
+        dora = Certidao.objects.get(quem_solicitou='DORA')
+        self.assertEqual(dora.data_solicitacao, date(2026, 1, 5))
+        self.assertEqual(dora.data_recebimento, date(2026, 2, 12))  # texto que é só uma data
+        self.assertEqual(dora.data_entrega, date(2026, 2, 20))      # data achada dentro do texto
+        self.assertIn('ENTREGUE PARA A MÃE EM 20/02/2026', dora.observacoes)
+        self.assertNotIn('Data do recebimento', dora.observacoes)  # era só a data: nada a guardar
+        self.assertEqual(dora.nome_contato, '13/02/2026')           # data digitada na coluna de nome
+        self.assertEqual((dora.telefone, dora.servidor_nome), ('34999990000', 'GUSTAVO'))
+
+        edu = Certidao.objects.get(quem_solicitou='EDU')
+        self.assertEqual(edu.data_solicitacao, date(2026, 1, 5))   # "05/01//2026"
+        self.assertIsNone(edu.data_entrega)                         # continua pendente
+
+    def test_dsf_com_beneficio_padronizado_e_sem_inventar_resultado(self):
+        self._planilha_completa()
+        self.importar()
+        gabi, helo = Dsf.objects.order_by('data')
+        self.assertEqual((gabi.beneficio_solicitado, gabi.resultado, gabi.tecnico_nome),
+                         (Dsf.Beneficio.CESTA_BASICA, 'DEFERIDO', 'PATRICIA'))
+        self.assertEqual(helo.resultado, '')
+
+    def test_falha_no_meio_nao_deixa_importacao_pela_metade(self):
+        self._planilha_completa()
+        with mock.patch.object(Dsf.objects, 'create', side_effect=RuntimeError('falhou')):
+            with self.assertRaises(RuntimeError):
+                self.importar()
+        self.assertEqual(RegistroAdministrativo.objects.count(), 0)
+        self.assertEqual(Certidao.objects.count(), 0)
 
 
 class DemoTriagensTests(TestCase):
