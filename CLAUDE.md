@@ -240,7 +240,7 @@ Pontos do modelo de dados:
   - O Tailscale roda no container `tailscale`, com rede do host.
   - Para ver a configuração: `docker exec tailscale tailscale funnel status`.
 - **Atualizar:** `cd /DATA/AppData/Cras-django && git pull && sudo docker compose -f compose.prod.yaml up -d --build`.
-- **Versão no ar (27/11/2026):** motivos novos e os quatro formulários (migrações `atendimentos/0005`, `certidoes/0004`, `dsf/0005`, `dmae/0001` e `propao/0001`). Cópias manuais do banco ficam em `dados/` (`backup-antes-*.sqlite3`).
+- **Versão no ar (27/11/2026):** commit `68f52fc`, com os motivos novos e os quatro formulários (migrações `atendimentos/0005`, `certidoes/0004`, `dsf/0005`, `dmae/0001` e `propao/0001`). Cópias manuais do banco ficam em `dados/` (`backup-antes-*.sqlite3`).
 - **Logs:** `sudo docker logs -f cras-app`.
 - **Verificar de fora sem SSH:** `nslookup servidor-test.taile3dafe.ts.net 1.1.1.1` e `curl --resolve servidor-test.taile3dafe.ts.net:10000:<IP público do relay> https://servidor-test.taile3dafe.ts.net:10000/login/`.
 
