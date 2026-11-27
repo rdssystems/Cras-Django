@@ -15,28 +15,31 @@
 </head>
 <body class="login-corpo">
     <div class="login-card">
-        <h1 class="login-titulo"><span class="marca-fita">CRAS</span></h1>
-        <p class="sub">Sistema de Gestão de Atendimentos</p>
-        {% if form.errors %}
-        <div class="alerta alerta-erro">
-            <span class="material-symbols-outlined">error</span> Usuário ou senha inválidos.
+        <header class="login-cabecalho">
+            <h1 class="login-titulo"><img class="marca-cras" src="{% static_v 'cras/img/marca-cras-transparente.svg' %}" width="1024" height="484" alt="Casa da Família — CRAS — Centro de Referência de Assistência Social"></h1>
+        </header>
+        <div class="login-formulario">
+            {% if form.errors %}
+            <div class="alerta alerta-erro">
+                <span class="material-symbols-outlined">error</span> Usuário ou senha inválidos.
+            </div>
+            {% endif %}
+            <form method="post">
+                {% csrf_token %}
+                <div class="campo">
+                    <label for="login-usuario">Usuário</label>
+                    <input id="login-usuario" type="text" name="username" autocomplete="username" class="form-control" autofocus required>
+                </div>
+                <div class="campo">
+                    <label for="login-senha">Senha</label>
+                    <input id="login-senha" type="password" name="password" autocomplete="current-password" class="form-control" required>
+                </div>
+                <button class="btn btn-primario btn-bloco" type="submit">
+                    <span class="material-symbols-outlined">login</span> Entrar
+                </button>
+                <input type="hidden" name="next" value="{{ next }}">
+            </form>
         </div>
-        {% endif %}
-        <form method="post">
-            {% csrf_token %}
-            <div class="campo">
-                <label for="login-usuario">Usuário</label>
-                <input id="login-usuario" type="text" name="username" autocomplete="username" class="form-control" autofocus required>
-            </div>
-            <div class="campo">
-                <label for="login-senha">Senha</label>
-                <input id="login-senha" type="password" name="password" autocomplete="current-password" class="form-control" required>
-            </div>
-            <button class="btn btn-primario btn-bloco" type="submit">
-                <span class="material-symbols-outlined">login</span> Entrar
-            </button>
-            <input type="hidden" name="next" value="{{ next }}">
-        </form>
     </div>
 </body>
 </html>

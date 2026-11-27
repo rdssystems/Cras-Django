@@ -21,9 +21,14 @@
 <a class="atalho-conteudo" href="#conteudo-principal">Ir para o conteúdo</a>
 <div class="app-main">
 <header class="app-topbar">
-    <a class="topbar-marca" href="{% url 'inicio' %}"><span class="marca-fita">CRAS</span></a>
+    <a class="topbar-marca" href="{% url 'inicio' %}" aria-label="CRAS — página inicial">
+        <img class="marca-cras" src="{% static_v 'cras/img/marca-cras-navbar.png' %}"
+             srcset="{% static_v 'cras/img/marca-cras-navbar.png' %} 1x, {% static_v 'cras/img/marca-cras-navbar@2x.png' %} 2x, {% static_v 'cras/img/marca-cras-navbar@3x.png' %} 3x"
+             width="160" height="84" alt="Casa da Família — CRAS — Centro de Referência de Assistência Social">
+    </a>
     <button class="menu-botao" type="button" aria-controls="menu-principal" aria-expanded="false" aria-label="Abrir menu"><span class="material-symbols-outlined" aria-hidden="true">menu</span> Menu</button>
     <nav id="menu-principal" class="navegacao-principal" aria-label="Navegação principal">
+        <div class="menu-lateral-titulo"><img class="marca-cras" src="{% static_v 'cras/img/marca-cras.svg' %}" width="1024" height="484" alt="Casa da Família — CRAS"><button class="menu-fechar" type="button" aria-label="Fechar menu"><span class="material-symbols-outlined" aria-hidden="true">close</span></button></div>
         <a class="sidebar-link {% if request.resolver_match.view_name == 'inicio' %}ativo{% endif %}" href="{% url 'inicio' %}">
             <span class="material-symbols-outlined" aria-hidden="true">dashboard</span> Painel
         </a>
@@ -56,7 +61,6 @@
         </a>
         </div>
         </details>
-    </nav>
     <div class="topbar-dir">
         {% if user.is_superuser %}
         <details class="menu-admin">
@@ -74,6 +78,8 @@
         {% endif %}
         <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="btn btn-sair" type="submit"><span class="material-symbols-outlined" aria-hidden="true">logout</span> Sair</button></form>
     </div>
+    </nav>
+    <button class="sidebar-mascara" type="button" aria-label="Fechar menu" tabindex="-1"></button>
 </header>
     <main id="conteudo-principal" class="app-conteudo" tabindex="-1">
         {% if messages %}
@@ -108,22 +114,53 @@ var menuBotao = document.querySelector('.menu-botao');
 var menuGestao = document.querySelector('.menu-gestao');
 var menuAdmin = document.querySelector('.menu-admin');
 if (menuBotao) {
+    var menuPrincipal = document.querySelector('.navegacao-principal');
+    var conteudoPrincipal = document.querySelector('#conteudo-principal');
     function fecharMenu() {
         document.body.classList.remove('menu-aberto');
+        conteudoPrincipal.inert = false;
         menuBotao.setAttribute('aria-expanded', 'false');
         menuBotao.setAttribute('aria-label', 'Abrir menu');
         if (menuGestao) menuGestao.open = false;
+        if (menuAdmin) menuAdmin.open = false;
     }
     menuBotao.addEventListener('click', function () {
         var aberto = document.body.classList.toggle('menu-aberto');
         menuBotao.setAttribute('aria-expanded', String(aberto));
         menuBotao.setAttribute('aria-label', aberto ? 'Fechar menu' : 'Abrir menu');
+        conteudoPrincipal.inert = aberto;
+        if (aberto) menuPrincipal.querySelector('.menu-fechar').focus();
+    });
+    var mascaraMenu = document.querySelector('.sidebar-mascara');
+    function fecharEDevolverFoco() {
+        fecharMenu();
+        menuBotao.focus();
+    }
+    if (mascaraMenu) mascaraMenu.addEventListener('click', fecharEDevolverFoco);
+    document.querySelector('.menu-fechar').addEventListener('click', fecharEDevolverFoco);
+    window.matchMedia('(max-width: 1100px)').addEventListener('change', fecharMenu);
+    document.querySelectorAll('.navegacao-principal a').forEach(function (link) {
+        link.addEventListener('click', fecharMenu);
     });
     document.addEventListener('click', function (evento) {
         if (menuGestao && !menuGestao.contains(evento.target)) menuGestao.open = false;
         if (menuAdmin && !menuAdmin.contains(evento.target)) menuAdmin.open = false;
     });
     document.addEventListener('keydown', function (evento) {
+        if (evento.key === 'Tab' && document.body.classList.contains('menu-aberto')) {
+            var itens = Array.from(menuPrincipal.querySelectorAll('a[href], button, summary')).filter(function (el) {
+                return !el.disabled && el.getClientRects().length > 0;
+            });
+            var primeiro = itens[0];
+            var ultimo = itens[itens.length - 1];
+            if (evento.shiftKey && document.activeElement === primeiro) {
+                evento.preventDefault();
+                ultimo.focus();
+            } else if (!evento.shiftKey && document.activeElement === ultimo) {
+                evento.preventDefault();
+                primeiro.focus();
+            }
+        }
         if (evento.key === 'Escape') {
             if (menuAdmin && menuAdmin.open) {
                 menuAdmin.open = false;
