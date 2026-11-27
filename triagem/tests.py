@@ -13,7 +13,6 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from administrativo.models import RegistroAdministrativo
 from atendimentos.models import RegistroAtendimento
 from certidoes.models import Certidao
 from dsf.models import Dsf
@@ -298,17 +297,29 @@ class ImportarPlanilhaTests(TestCase):
         self.assertEqual(registro.nome, 'BRUNO')
         self.assertEqual(registro.hora_entrada, time(8, 15))
 
-        self.assertEqual(RegistroAdministrativo.objects.count(), 1)
         self.assertEqual(TapDiario.objects.get(data=date(2026, 1, 1)).tap_diario, 12)
+
+    def test_aba_do_historico_administrativo_nao_e_importada(self):
+        saida = StringIO()
+        call_command('importar_planilha', arquivo=self.caminho, stdout=saida)
+        self.assertNotIn('1S2024', saida.getvalue())
+        for modelo in (Atendimento, RegistroAtendimento):
+            self.assertFalse(modelo.objects.filter(nome='ANA').exists())  # só existe naquela aba
 
     def test_reimportar_sem_forcar_e_bloqueado(self):
         self.importar()
-        with self.assertRaisesMessage(CommandError, 'já foi importada'):
+        with self.assertRaisesMessage(CommandError, 'pode DUPLICAR'):
             self.importar()
-        self.assertEqual(RegistroAdministrativo.objects.count(), 1)
+        self.assertEqual(Atendimento.objects.count(), 1)
 
         self.importar(forcar=True)
-        self.assertEqual(RegistroAdministrativo.objects.count(), 2)
+        self.assertEqual(Atendimento.objects.count(), 2)
+
+    def test_banco_em_uso_nao_recebe_a_planilha_sem_forcar(self):
+        Certidao.objects.create(data_solicitacao=date(2026, 11, 5), quem_solicitou='Bia', de_quem='Ana')
+        with self.assertRaisesMessage(CommandError, 'já tem 1 registros'):
+            self.importar()
+        self.assertFalse(Atendimento.objects.exists())
 
     def _planilha_completa(self):
         """Planilha como a atual do CRAS Morumbi: motivos em várias colunas, Certidões e DSF."""
@@ -371,7 +382,7 @@ class ImportarPlanilhaTests(TestCase):
         with mock.patch.object(Dsf.objects, 'create', side_effect=RuntimeError('falhou')):
             with self.assertRaises(RuntimeError):
                 self.importar()
-        self.assertEqual(RegistroAdministrativo.objects.count(), 0)
+        self.assertEqual(Atendimento.objects.count(), 0)
         self.assertEqual(Certidao.objects.count(), 0)
 
 

@@ -64,10 +64,9 @@
     <div class="topbar-dir">
         {% if user.is_superuser %}
         <details class="menu-admin">
-            <summary class="admin-botao {% if request.resolver_match.view_name|startswith:'usuarios' or request.resolver_match.view_name|startswith:'administrativo' %}ativo{% endif %}">Administrador <span class="material-symbols-outlined seta-menu" aria-hidden="true">expand_more</span></summary>
+            <summary class="admin-botao {% if request.resolver_match.view_name|startswith:'usuarios' %}ativo{% endif %}">Administrador <span class="material-symbols-outlined seta-menu" aria-hidden="true">expand_more</span></summary>
             <div class="menu-admin-itens">
                 <a class="sidebar-link {% if request.resolver_match.view_name|startswith:'usuarios' %}ativo{% endif %}" href="{% url 'usuarios:lista' %}"><span class="material-symbols-outlined" aria-hidden="true">manage_accounts</span> Usuários</a>
-                <a class="sidebar-link {% if request.resolver_match.view_name|startswith:'administrativo' %}ativo{% endif %}" href="{% url 'administrativo:lista' %}"><span class="material-symbols-outlined" aria-hidden="true">history</span> Histórico Admin.</a>
             </div>
         </details>
         {% else %}

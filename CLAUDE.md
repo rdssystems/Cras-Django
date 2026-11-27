@@ -16,7 +16,7 @@
 
 ## 1. O que é
 
-Sistema web interno que **substitui a planilha de controle do CRAS** (Centro de Referência de Assistência Social). Cada aba da planilha virou um app Django.
+Sistema web interno que **substitui a planilha de controle do CRAS** (Centro de Referência de Assistência Social). Cada aba da planilha virou um app Django, exceto o histórico administrativo antigo, **removido em 27/11/2026** (seção 7).
 
 O núcleo é o fluxo **triagem → fila → atendimento**:
 
@@ -66,7 +66,7 @@ Outras formas de rodar:
 | `dmae` | `IsencaoDmae`, `MembroDmae`, `EvolucaoDmae` | Menu "Isenção DMAE": Requerimento DMAE (lista, cria e edita). Ver 4.6 |
 | `propao` | `RequerimentoProPao`, `PessoaProPao`, `ProcedimentoProPao` | Menu "PRÓ-PÃO": Requerimento do PRÓ-PÃO (lista, cria e edita). Ver 4.6 |
 | `tap` | `TapDiario` | Grade mensal editável |
-| `administrativo` | `RegistroAdministrativo` | Histórico 2019–2024 importado da planilha; só leitura, com busca e paginação |
+| `administrativo` | — | **Desativado em 27/11/2026.** Só as migrações, que apagam o antigo histórico de qualquer banco. Não recriar |
 | `usuarios` | `Usuario` | Usuário com `cargo` e gestão de contas em `/usuarios/` |
 
 - **Templates:** ficam em `templates/` (uma pasta por app), mais `base.html`, `inicio.html` e `_campo.html`.
@@ -115,7 +115,7 @@ Pontos do modelo de dados:
 | Psicólogo(a), Assistente Social | ✅ | ✅ |
 | Administrativo | ❌ | ✅ |
 
-- **Visualização e outras telas:** todo usuário logado vê as duas filas e acessa as outras telas, com duas exceções: a ficha do DSF (só Assistente Social, Psicólogo(a) e administrador, seção 4.6) e o *Histórico Admin.* (só administrador). **O restante ainda não foi decidido pelo usuário** (seção 12).
+- **Visualização e outras telas:** todo usuário logado vê as duas filas e acessa as outras telas, com uma exceção: a ficha do DSF (só Assistente Social, Psicólogo(a) e administrador, seção 4.6). **O restante ainda não foi decidido pelo usuário** (seção 12).
 
 ### 4.5 Contas de usuário (`/usuarios/`)
 - **Acesso:** só para superusuário (decorator `somente_administrador`). O menu *Administração → Usuários* só aparece para ele.
@@ -168,12 +168,7 @@ Pontos do modelo de dados:
   - O Django entrega tudo via `json_script` e o JS não faz requisições.
 - **Seção "Últimos 30 dias"** (sistema novo): atendimentos por dia (colunas empilhadas por desfecho), tipo de atendimento e chegadas por horário.
   - Quem ainda está na fila **hoje** aparece como "Aguardando" (cinza `#7c8ba1`), não como "Sem atendimento".
-- **Seção "Histórico administrativo"** (planilha, fev/2019 a set/2024): por mês, motivos, top 10 bairros, faixa etária e quantas vezes cada pessoa foi atendida.
-  - Fica **10 min em cache**. A chave usa a contagem e o maior id; por isso, uma edição feita pelo `/admin/` demora até 10 min para aparecer.
-- **Regras de cálculo:**
-  - Pessoa = CPF (só dígitos, com o zero à esquerda recuperado) ou, sem CPF, o nome sem acento.
-  - Meses nas pontas com menos de 10 registros são descartados (datas digitadas erradas).
-  - Bairros são agrupados sem acento e com abreviações expandidas.
+- É a única seção. A *Histórico administrativo* (5 gráficos da planilha) foi removida em 27/11/2026.
 - **Cores dos gráficos** (validadas para daltonismo): teal `#0d9488`, azul `#3b82f6`, âmbar `#d97706`. Não use o teal da marca (`#0f766e`) em gráficos.
 - **Gotcha do ECharts 6:** o `containLabel` mede os rótulos **sem** a fonte global. Ponha `fontFamily` em cada `axisLabel`, `label` e `legend.textStyle`, usando o helper `texto()`, senão o rótulo sai cortado.
 - **Tabela:** cada gráfico tem um botão que troca para uma tabela com os mesmos números.
@@ -222,6 +217,8 @@ Pontos do modelo de dados:
   - Para limpar: `python manage.py demo_triagens --remover`.
 - **Antes de mudar o schema ou rodar comandos que escrevem no banco:** faça uma cópia do `db.sqlite3` fora do projeto.
 - **O banco da VPS é outro**, separado do local. Ele começou vazio em 26/11/2026 e, no mesmo dia, recebeu a planilha atual do CRAS Morumbi (`BANCO DE DADOS MORUMBI.xlsx`, a pedido do usuário). Nunca copie o banco local (com dados antigos e com a demonstração) para a VPS sem o usuário pedir.
+- **Histórico administrativo removido (27/11/2026):** os registros da aba `1S2024 ATENDIMENTO ADMINISTRATI` não deveriam estar no sistema. Página, menu, gráficos, modelo e dados foram apagados.
+  - Não voltar a importar essa aba. Uma cópia antiga do banco só pode ser restaurada rodando o `migrate` em seguida, que apaga o histórico de novo.
 - **Planilhas:** toda planilha `.xlsx` na pasta tem dados reais e fica fora do git. Depois de importada na VPS, o arquivo é apagado de lá.
 
 ### 7.1 Produção (VPS, desde 26/11/2026)
@@ -248,13 +245,13 @@ Pontos do modelo de dados:
 
 | Comando | O que faz |
 |---|---|
-| `importar_planilha --arquivo <xlsx>` | Importa a planilha do CRAS: histórico 1S2024 (`RegistroAdministrativo`), controle diário (`Atendimento`), Registro de Atendimentos, TAP 2026, **Certidões** e **DSF**. Detalhes abaixo. |
+| `importar_planilha --arquivo <xlsx>` | Importa a planilha do CRAS: controle diário (`Atendimento`), Registro de Atendimentos, TAP 2026, **Certidões** e **DSF**. A aba do histórico administrativo é ignorada. Detalhes abaixo. |
 | `demo_triagens` | Apaga a demonstração anterior e cria cerca de 950 triagens fictícias: 30 dias úteis sem feriados nacionais, mais hoje com cerca de 28 pessoas na fila. Também cria 7 servidores `demo_*` sem senha. A espera de "hoje" é contada a partir da hora em que o comando roda. |
 | `demo_triagens --remover` | Apaga só o que está ligado aos usuários `demo_*`, sem tocar em dados reais. |
 
 **Como o `importar_planilha` funciona:**
 - **Tudo ou nada:** roda numa transação única. Se algo falhar, o banco fica como estava.
-- **Trava:** recusa rodar se já houver histórico importado, porque reimportar **duplica** os dados (só o TAP usa `update_or_create`). Para forçar, use `--forcar`.
+- **Trava:** recusa rodar se o banco já tiver qualquer triagem, atendimento, certidão ou DSF, porque a importação pode **duplicar** os dados (o TAP usa `update_or_create` e não entra na conferência). Para forçar, use `--forcar`.
 - **Já rodado:** no banco local, com a planilha antiga; na VPS, em 26/11/2026, com `BANCO DE DADOS MORUMBI.xlsx`.
 - **Motivos:** as 4 colunas de motivo viram a lista separada por `; `, como na múltipla escolha. Os textos ficam como estão na planilha, sem trocar pela lista oficial.
 - **Certidões:**
@@ -269,7 +266,7 @@ Pontos do modelo de dados:
 
 ## 9. Testes
 
-`.venv/Scripts/python manage.py test` → **104 testes, 103 passando** (26/11/2026).
+`.venv/Scripts/python manage.py test` → **100 testes, 99 passando** (27/11/2026).
 
 A falha é `test_sao_duas_filas_administrativa_e_psicossocial`: o commit `c1c2cae` (24/11) tirou do Painel os cards das duas filas, e o teste ainda os procura. Falta o usuário decidir entre ajustar o teste e devolver as filas ao Painel (seção 12).
 
@@ -284,7 +281,7 @@ A falha é `test_sao_duas_filas_administrativa_e_psicossocial`: o commit `c1c2ca
 | [propao/tests.py](propao/tests.py) | Requerimento do PRÓ-PÃO: criar, editar, CEP, 2º imóvel, procedimentos e deferido sem edição |
 | [tap/tests.py](tap/tests.py) | TAP |
 
-Administrativo e a lista de atendimentos ainda não têm testes. Toda mudança de regra deve vir com teste.
+A lista de atendimentos ainda não tem testes. Toda mudança de regra deve vir com teste.
 
 ## 10. Ambiente (Windows) — gotchas
 
@@ -326,6 +323,7 @@ Administrativo e a lista de atendimentos ainda não têm testes. Toda mudança d
 | 26/11/2026 | Ficha do PRÓ-PÃO a partir do documento Word, último dos quatro formulários. Escolhas do agente: app próprio `propao`, 4 linhas iniciais na composição familiar, tabela final chamada "Procedimentos", seção V sempre visível e sem restrição de cargo. Só no localhost. |
 | 27/11/2026 | O usuário autorizou subir só a correção das datas de certidão (commit `9e96669`); VPS atualizada no mesmo dia. Conferidas as 490 certidões contra a planilha: nenhuma data perdida. O restante continua apenas no localhost. |
 | 27/11/2026 | O usuário mandou publicar o que estava só no localhost: motivos novos, rótulo da triagem, menu *Gestão* e os quatro formulários. Os "só no localhost" acima são anteriores a esta publicação. |
+| 27/11/2026 | **Histórico administrativo removido** do sistema, do localhost e da produção, com os gráficos do Painel que o usavam: os dados vieram da planilha no início do desenvolvimento e não deveriam ter subido. Escolhas do agente: apagar também o modelo e a importação, compactar o banco e tirar o histórico das cópias de segurança. |
 
 ## 12. Pendências (próximos passos)
 
@@ -333,7 +331,7 @@ Administrativo e a lista de atendimentos ainda não têm testes. Toda mudança d
    - Psicólogo(a) e Assistente Social continuam atendendo a fila administrativa.
    - O Administrativo continua vendo os nomes da fila psicossocial.
    - "Atendimento psicossocial" só pode ser registrado por Psicólogo(a) ou Assistente Social.
-   - Já definido: a ficha do DSF é de Assistente Social e Psicólogo(a); o Histórico (que tem CPF) é só do administrador. Falta definir quem acessa Certidões, TAP, a lista do DSF e as próximas abas.
+   - Já definido: a ficha do DSF é de Assistente Social e Psicólogo(a). Falta definir quem acessa Certidões, TAP, a lista do DSF e as próximas abas.
 2. **Teste das filas no Painel:** ajustar o teste ou devolver as filas ao Painel (seção 9).
 2.1. **DSF, Certidões, Isenção DMAE e PRÓ-PÃO:** faltam o **deferimento** (quem pode deferir ainda não foi decidido) e os **PDFs** das fichas (os logos ficam para mais adiante, segundo o usuário). Falta confirmar se o Administrativo pode ver a lista do DSF, quem faz Certidões, Isenção DMAE e PRÓ-PÃO, quem escreve o parecer social (DMAE) e quem preenche a análise do sistema (PRÓ-PÃO).
 2.2. **TAP 2026:** a planilha importada não tinha nenhum valor diário, só a linha TOTAL zerada.

@@ -153,42 +153,6 @@
         return o;
     }
 
-    // Série temporal: linha de 2px com área bem suave e o pico rotulado.
-    function area(g) {
-        var o = base(g);
-        var cor = SERIES[0];
-        o.grid.top = 32;
-        o.tooltip.axisPointer = { type: 'line', lineStyle: { color: COR.eixo, width: 1 } };
-        o.xAxis = eixoCategorias(g, { boundaryGap: false });
-        o.yAxis = eixoValores();
-        o.series = [{
-            type: 'line',
-            data: g.series[0].valores,
-            smooth: 0.3,
-            smoothMonotone: 'x',
-            showSymbol: false,
-            symbol: 'circle',
-            symbolSize: 8,
-            lineStyle: { width: 2, color: cor, cap: 'round', join: 'round' },
-            itemStyle: { color: cor, borderColor: COR.superficie, borderWidth: 2 },
-            areaStyle: {
-                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                    { offset: 0, color: 'rgba(43, 58, 140, 0.16)' },
-                    { offset: 1, color: 'rgba(43, 58, 140, 0.02)' }
-                ])
-            },
-            emphasis: { focus: 'none', scale: false },
-            markPoint: {
-                symbol: 'circle',
-                symbolSize: 8,
-                itemStyle: { color: cor, borderColor: COR.superficie, borderWidth: 2 },
-                label: rotuloValor({ position: 'top', distance: 6, color: COR.texto }),
-                data: [{ type: 'max' }]
-            }
-        }];
-        return o;
-    }
-
     // Colunas empilhadas por desfecho. Uma dica lista todas as camadas do dia, mais o total.
     function colunasEmpilhadas(g) {
         var o = base(g);
@@ -239,7 +203,7 @@
         return o;
     }
 
-    var MONTAR = { colunas: colunas, barras: barras, area: area, colunas_empilhadas: colunasEmpilhadas };
+    var MONTAR = { colunas: colunas, barras: barras, colunas_empilhadas: colunasEmpilhadas };
 
     // ---------------------------------------------------------------- tabela (mesmos dados, sem gráfico)
     function celula(linha, texto, numerica, tag) {

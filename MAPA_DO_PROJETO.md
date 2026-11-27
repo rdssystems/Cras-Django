@@ -27,7 +27,7 @@ O núcleo é o fluxo **triagem → fila → atendimento**:
 | *(documento Word)* | `dmae` | `IsencaoDmae`, `MembroDmae`, `EvolucaoDmae` | Menu "Isenção DMAE": Requerimento DMAE, com lista, criação e edição enquanto pendente |
 | *(documento Word)* | `propao` | `RequerimentoProPao`, `PessoaProPao`, `ProcedimentoProPao` | Menu "PRÓ-PÃO": requerimento, com lista, criação e edição enquanto pendente |
 | 2026 TAP MENSAL | `tap` | `TapDiario` | Grade mensal editável |
-| 1S2024 ATENDIMENTO ADMINISTRATI | `administrativo` | `RegistroAdministrativo` | Histórico só leitura, com busca e paginação |
+| 1S2024 ATENDIMENTO ADMINISTRATI | — | — | Removida do sistema em 27/11/2026 (não deveria ter sido importada) |
 | *(nova)* | `usuarios` | `Usuario` | Usuário customizado com `cargo` |
 
 ---
@@ -88,7 +88,7 @@ Gestao Cras Django/
 ├── dmae/                              # IsencaoDmae (Requerimento DMAE)
 ├── propao/                            # RequerimentoProPao
 ├── tap/                               # TapDiario
-├── administrativo/                    # RegistroAdministrativo (histórico 1S2024)
+├── administrativo/                    # desativado: só as migrações que apagam o antigo histórico
 ├── templates/                         # todos os templates (base.html + 1 pasta por app)
 └── stitch_sistema_de_atendimento_cras/
     ├── DESIGN.md                      # design system "Assistência Social Integrada"
@@ -209,22 +209,13 @@ erDiagram
         date data "unique"
         int tap_diario
     }
-    RegistroAdministrativo {
-        string nome
-        date data_nasc
-        string cpf
-        string bairro
-        date data_atendimento
-        string motivo
-        string servidor "texto livre"
-    }
 ```
 
 Pontos importantes:
 
 - **Todos os FKs para `Usuario` usam `SET_NULL`**: apagar um servidor não apaga histórico.
-- **Não existe entidade "Cidadão/Pessoa".** Nome e CPF são repetidos em `Atendimento`, `RegistroAtendimento` e `RegistroAdministrativo`, sem ligação entre eles. Também não há validação nem normalização de CPF.
-- `TapDiario` e `RegistroAdministrativo` não têm nenhum vínculo com usuário.
+- **Não existe entidade "Cidadão/Pessoa".** Nome e CPF são repetidos em `Atendimento`, `RegistroAtendimento` e nas fichas, sem ligação entre eles. Também não há validação nem normalização de CPF.
+- `TapDiario` não tem nenhum vínculo com usuário.
 - `servidor2` nunca é preenchido por nenhuma tela, só pelo `/admin/`.
 
 ---
@@ -249,7 +240,6 @@ Todas as views usam `@login_required`. Fora a regra de fila (seção 6), **qualq
 | `/isencao-dmae/`, `novo/`, `<pk>/editar/` | `dmae.lista`, `criar`, `editar` | `dmae/lista.html`, `form.html` | Lista com pendentes, deferidos e indeferidos; ficha completa; edição só de requerimento pendente. Qualquer usuário logado. O endereço antigo `/dsf/isencao-dmae/` redireciona para cá |
 | `/pro-pao/`, `novo/`, `<pk>/editar/` | `propao.lista`, `criar`, `editar` | `propao/lista.html`, `form.html` | Mesmo fluxo da DMAE (`cras/fichas.py`). O endereço antigo `/dsf/pro-pao/` redireciona para cá. DSF, Certidões, Isenção DMAE e PRÓ-PÃO são opções do menu *Gestão* |
 | `/tap/?ano=&mes=` | `tap.mensal` | `tap/mensal.html` | Grade de 28–31 campos; salva todos os dias do mês |
-| `/administrativo/?q=` | `administrativo.lista` | `administrativo/lista.html` | Busca por nome/CPF/motivo, 50 por página |
 
 ---
 
@@ -341,20 +331,19 @@ Comando: [triagem/management/commands/importar_planilha.py](triagem/management/c
 
 | Aba | Destino | Observação |
 |---|---|---|
-| 1S2024 ATENDIMENTO ADMINISTRATI | `RegistroAdministrativo` | `bulk_create`; pula linhas sem nome |
+| 1S2024 ATENDIMENTO ADMINISTRATI | — | **Não importada** (histórico removido em 27/11/2026) |
 | CONTROLE DE ATENDIMENTOS DIÁRIO | `Atendimento` | Um `create()` por linha; o `numero` da planilha é ignorado e recalculado. Linhas **sem data são ignoradas** (e contadas no relatório). As horas da planilha são preservadas. |
 | REGISTRO DE ATENDIMENTOS | `RegistroAtendimento` | As 4 colunas de motivo são concatenadas; o responsável vira texto em `responsavel_legado`. Linhas **sem nome ou sem data são ignoradas**. |
 | 2026 TAP MENSAL | `TapDiario` | Ano fixo **2026**; `update_or_create` (essa é a única parte idempotente) |
-| CERTIDÕES | — | **Não importada** |
-| DSF CONCLUÍDO | — | **Não importada** |
+| CERTIDÕES | `Certidao` | Desde 26/11/2026; detalhes na seção 8 do CLAUDE.md |
+| DSF CONCLUÍDO | `Dsf` | Desde 26/11/2026; idem |
 
-**Trava:** se o histórico administrativo já tem registros, o comando **se recusa a rodar**, porque reimportar duplicaria os dados. Para forçar mesmo assim: `python manage.py importar_planilha --forcar`.
+**Trava:** se o banco já tiver triagens, atendimentos, certidões ou DSF, o comando **se recusa a rodar**, porque poderia duplicar os dados. Para forçar mesmo assim: `python manage.py importar_planilha --forcar`.
 
 **Situação da planilha atual:**
 
 - A aba CONTROLE DIÁRIO só tem linhas-modelo, sem nenhum nome preenchido.
 - A aba REGISTRO tem uma única linha, e ela está sem nome.
-- Algumas células de data da aba administrativa estão digitadas como número (ex.: `14062023`). O openpyxl as trata como erro, então essas datas ficam vazias no histórico.
 
 ---
 
@@ -375,7 +364,6 @@ Os dados são agregados em [cras/graficos.py](cras/graficos.py) e desenhados por
 Cada seção abre com um cabeçalho (ícone, título, período) e uma faixa de quatro números (`resumo` no dict da seção):
 
 - **Últimos 30 dias:** Triagens, Atendidas (%), Sem atendimento (%), Horário de pico.
-- **Histórico administrativo:** Atendimentos, Pessoas atendidas, Média por mês, Voltaram mais de uma vez (%).
 
 A grade usa container query: 2 colunas quando a seção tem mais de 860px de largura, 1 coluna abaixo disso.
 
@@ -384,20 +372,9 @@ A grade usa container query: 2 colunas quando a seção tem mais de 860px de lar
 | Últimos 30 dias | Atendimentos por dia (Atendidos / Resolvidos na triagem / Sem atendimento) | `Atendimento` | Colunas empilhadas |
 | Últimos 30 dias | Tipo de atendimento | `RegistroAtendimento` | Barras em ranking |
 | Últimos 30 dias | Chegadas por horário | `Atendimento.hora_entrada` | Colunas |
-| Histórico administrativo | Atendimentos por mês | `RegistroAdministrativo` | Área |
-| Histórico administrativo | Motivos dos atendimentos | idem | Barras em ranking |
-| Histórico administrativo | Os 10 bairros com mais pessoas atendidas | idem | Barras em ranking |
-| Histórico administrativo | Pessoas atendidas por faixa etária | idem | Colunas |
-| Histórico administrativo | Quantas vezes cada pessoa foi atendida | idem | Colunas |
 
-Regras de cálculo:
+A seção *Histórico administrativo* (5 gráficos) foi removida em 27/11/2026.
 
-- **Pessoa** = CPF (só dígitos, com o zero à esquerda recuperado); sem CPF válido, o nome sem acento.
-- **Período do histórico:** as pontas da série mensal com menos de 10 registros são descartadas (datas digitadas erradas como 1930 e 2032). Hoje fica de fev/2019 a set/2024.
-- **Idade:** calculada na data do atendimento mais recente da pessoa; idades fora de 0–110 são ignoradas (há nascimentos em 9999).
-- **Bairro:** agrupado sem acento e com `STA`/`JD`/`STO`/`RES` expandidos; exibe a grafia com acento. Não junta variações como "Viviane" e "Residencial Viviane".
-- **Motivo:** `PSICOSOCIAL` (erro da planilha) é somado a Psicossocial.
-- **Cache:** a seção histórica fica 10 min em cache (~150 ms para agregar). A chave muda se entrar ou sair registro, mas uma edição de registro existente pelo `/admin/` só aparece depois desses 10 min.
 - **Cores:** teal `#0d9488`, azul `#3b82f6`, âmbar `#d97706`, validadas para contraste e daltonismo. O teal da marca (`#0f766e`) é acinzentado demais para gráfico.
 - Cada gráfico tem um botão que troca para a **tabela** com os mesmos números.
 
@@ -409,7 +386,6 @@ Regras de cálculo:
 
 | Tabela | Registros |
 |---|---|
-| `RegistroAdministrativo` | 12.448 |
 | `TapDiario` | 30 |
 | `Atendimento` | 2 (ambos em 10/11/2026) |
 | `RegistroAtendimento` | 1 (09/11/2026; lixo de importação com nome vazio, ver C1) |
@@ -423,7 +399,7 @@ Regras de cálculo:
 
 > Em 23/11/2026 o banco recebeu a demonstração do `demo_triagens`: cerca de 950 triagens e 670 registros de atendimento fictícios, além dos números acima. Para voltar ao estado real: `python manage.py demo_triagens --remover`.
 
-Testes: `python manage.py test` → **104 testes, 103 passando** em 26/11/2026 (a falha é a das filas no Painel; ver CLAUDE.md). Ficam em [triagem/tests.py](triagem/tests.py), [tap/tests.py](tap/tests.py), [cras/tests.py](cras/tests.py) para os gráficos do Painel, [usuarios/tests.py](usuarios/tests.py) para as contas [dsf/tests.py](dsf/tests.py), [certidoes/tests.py](certidoes/tests.py), [dmae/tests.py](dmae/tests.py) e [propao/tests.py](propao/tests.py).
+Testes: `python manage.py test` → **100 testes, 99 passando** em 27/11/2026 (a falha é a das filas no Painel; ver CLAUDE.md). Ficam em [triagem/tests.py](triagem/tests.py), [tap/tests.py](tap/tests.py), [cras/tests.py](cras/tests.py) para os gráficos do Painel, [usuarios/tests.py](usuarios/tests.py) para as contas, [dsf/tests.py](dsf/tests.py), [certidoes/tests.py](certidoes/tests.py), [dmae/tests.py](dmae/tests.py) e [propao/tests.py](propao/tests.py).
 
 > ⚠️ O `importar_planilha` **já foi executado**. Agora o comando se recusa a rodar de novo sem `--forcar`.
 
@@ -458,8 +434,8 @@ Todos foram confirmados lendo o código e, quando possível, executando trechos 
 |---|---|---|
 | B1 ✅ | **Versionamento** | Desde 23/11/2026 a pasta tem repositório git próprio, publicado em [github.com/rdssystems/Cras-Django](https://github.com/rdssystems/Cras-Django). O repositório é **público**. O `.gitignore` exclui `db.sqlite3`, `*.xlsx` e `summary.json`, que têm nome, CPF e telefone de cidadãos. Confira o `git status` antes de cada commit. |
 | B2 ✅ | **Configuração de produção** | Resolvido em 26/11/2026. O `settings.py` lê DEBUG, chave, hosts, origens CSRF e caminho do banco de variáveis de ambiente, e sem chave em produção o sistema não sobe. Produção usa gunicorn + whitenoise via `compose.prod.yaml`, publicada na VPS pelo Tailscale Funnel (detalhes na seção 7.1 do CLAUDE.md). A chave `django-insecure-…` do código continua pública, mas só vale no modo de desenvolvimento. |
-| B3 | **Testes** | ◐ Hoje há 19 testes cobrindo triagem, filas, atendimento, numeração, importador e TAP. Certidões, DSF, administrativo e atendimentos continuam sem testes. |
-| B4 ◐ | **Permissões** | Há regra para as filas, para a ficha do DSF (Assistente Social, Psicólogo(a) ou administrador) e para o histórico (só administrador). No resto, qualquer usuário logado edita certidões, Isenção DMAE (com o parecer social), PRÓ-PÃO (com a análise do sistema) e TAP. Não há trilha de auditoria. |
+| B3 | **Testes** | ◐ Hoje há 100 testes. A lista de atendimentos continua sem testes. |
+| B4 ◐ | **Permissões** | Há regra para as filas e para a ficha do DSF (Assistente Social, Psicólogo(a) ou administrador). No resto, qualquer usuário logado edita certidões, Isenção DMAE (com o parecer social), PRÓ-PÃO (com a análise do sistema) e TAP. Não há trilha de auditoria. |
 | B5 ◐ | **Importador não idempotente** | Há uma trava que exige `--forcar` para reimportar, e desde 26/11/2026 a importação roda numa transação única (tudo ou nada). Mesmo assim, só o TAP usa `update_or_create`, e o resto duplica quando forçado. Também desde 26/11/2026 importa **Certidões** e **DSF**, com os nomes de servidor e técnico nos campos `*_legado` e o texto das colunas de data em `observacoes`. |
 | B6 | **Performance** | `/atendimentos/` lista **tudo**, sem paginação. Com a aba REGISTRO DE ATENDIMENTOS importada (~42 mil linhas), a página fica pesada. O filtro de data também não mantém o valor escolhido. A demonstração confirmou o problema: com 675 registros, a página tem 61 mil px de altura e leva 1,6 s para carregar. |
 | B12 | **Controle diário com dia cheio** | Visto com a demonstração: a tabela fica mais larga que o card. A coluna "Servidor triagem" sai cortada (há rolagem lateral), o CPF quebra em duas linhas e os nomes em três. |
@@ -473,9 +449,9 @@ Todos foram confirmados lendo o código e, quando possível, executando trechos 
 
 ## 11. Próximos passos sugeridos (por prioridade)
 
-1. **Definir permissões por cargo** (quem vê a fila psicossocial, quem registra qual tipo de atendimento, quem acessa Certidões/DSF/TAP/Histórico). Ver B4.
+1. **Definir permissões por cargo** (quem vê a fila psicossocial, quem registra qual tipo de atendimento, quem acessa Certidões/DSF/TAP). Ver B4.
 2. **Decidir sobre o registro inválido C1** (apagar ou manter).
 3. **Settings por ambiente** (`.env` com `SECRET_KEY` própria, já que a chave atual está pública) e `requirements.txt`.
 4. **Paginação** em `/atendimentos/` e refresh automático leve nas filas (por exemplo, recarregar a cada 30 s).
-5. **Importador:** importar CERTIDÕES e DSF, e recuperar as datas digitadas como número.
-6. Testes para certidões, DSF e administrativo.
+5. **Importador:** recuperar as datas digitadas como número.
+6. Testes para a lista de atendimentos.

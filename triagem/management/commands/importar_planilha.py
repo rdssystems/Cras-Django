@@ -7,7 +7,6 @@ from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-from administrativo.models import RegistroAdministrativo
 from atendimentos.models import RegistroAtendimento
 from certidoes.models import Certidao
 from dsf.models import Dsf
@@ -95,22 +94,23 @@ def parse_hora(valor):
 
 
 class Command(BaseCommand):
-    help = 'Importa a planilha do CRAS (.xlsx): histórico, triagens, atendimentos, TAP, certidões e DSF.'
+    help = 'Importa a planilha do CRAS (.xlsx): triagens, atendimentos, TAP, certidões e DSF.'
 
     def add_arguments(self, parser):
         parser.add_argument('--arquivo', type=str, default=str(settings.BASE_DIR / 'PROJETO BANCO DE DADOS - CRAS.xlsx'))
         parser.add_argument(
             '--forcar', action='store_true',
-            help='Importa mesmo que o banco já tenha dados importados (vai DUPLICAR o histórico).',
+            help='Importa mesmo que o banco já tenha registros (pode DUPLICAR os dados).',
         )
 
     def handle(self, *args, **opcoes):
         caminho = opcoes['arquivo']
-        ja_importados = RegistroAdministrativo.objects.count()
-        if ja_importados and not opcoes['forcar']:
+        # O TAP fica de fora da conferência: ele usa update_or_create e não duplica.
+        existentes = sum(m.objects.count() for m in (Atendimento, RegistroAtendimento, Certidao, Dsf))
+        if existentes and not opcoes['forcar']:
             raise CommandError(
-                f'A planilha já foi importada ({ja_importados} registros no histórico administrativo). '
-                'Rodar de novo DUPLICA os dados. Se for mesmo isso, use --forcar.'
+                f'O banco já tem {existentes} registros de triagem, atendimento, certidão ou DSF. '
+                'Importar agora pode DUPLICAR os dados. Se for mesmo isso, use --forcar.'
             )
         wb = openpyxl.load_workbook(caminho, data_only=True, read_only=True)
         try:
@@ -122,31 +122,6 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS('Importação concluída.'))
 
     def _importar(self, wb):
-        ws = wb['1S2024 ATENDIMENTO ADMINISTRATI']
-        registros = []
-        for linha in ws.iter_rows(min_row=2, values_only=True):
-            nome = texto(linha[0]) if len(linha) > 0 else ''
-            if not nome:
-                continue
-            cpf = texto(linha[2]) if len(linha) > 2 else ''
-            bairro = texto(linha[3]) if len(linha) > 3 else ''
-            telefone = texto(linha[4]) if len(linha) > 4 else ''
-            motivo = texto(linha[6]) if len(linha) > 6 else ''
-            servidor = texto(linha[9]).replace('\n', ' / ') if len(linha) > 9 else ''
-            registros.append(RegistroAdministrativo(
-                nome=nome,
-                data_nasc=parse_data(linha[1]) if len(linha) > 1 else None,
-                cpf=cpf,
-                bairro=bairro,
-                telefone=telefone,
-                data_atendimento=parse_data(linha[5]) if len(linha) > 5 else None,
-                motivo=motivo,
-                servidor=servidor,
-            ))
-        if registros:
-            RegistroAdministrativo.objects.bulk_create(registros, batch_size=2000)
-        self.stdout.write(self.style.SUCCESS(f'Administrativo (1S2024): {len(registros)} registros importados.'))
-
         # Linhas sem data são puladas: antes viravam "hoje" e caíam na fila do dia.
         ws = wb['CONTROLE DE ATENDIMENTOS DIÁRIO']
         n = sem_data = 0
