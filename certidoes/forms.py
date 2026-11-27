@@ -12,15 +12,15 @@ class CertidaoForm(forms.ModelForm):
             'data_entrega', 'entregue_para', 'observacoes',
         ]
         widgets = {
-            'data_solicitacao': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'data_solicitacao': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date', 'class': 'form-control'}),
             'quem_solicitou': forms.TextInput(attrs={'class': 'form-control'}),
             'de_quem': forms.TextInput(attrs={'class': 'form-control'}),
             'telefone': forms.TextInput(attrs={'class': 'form-control'}),
             'cidade': forms.TextInput(attrs={'class': 'form-control'}),
-            'data_recebimento': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'data_recebimento': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date', 'class': 'form-control'}),
             'nome_contato': forms.TextInput(attrs={'class': 'form-control'}),
             'contato_em': forms.TextInput(attrs={'class': 'form-control'}),
-            'data_entrega': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'data_entrega': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date', 'class': 'form-control'}),
             'entregue_para': forms.TextInput(attrs={'class': 'form-control'}),
             'observacoes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
