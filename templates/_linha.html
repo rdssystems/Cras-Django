@@ -1,0 +1,17 @@
+<tr{% if linha.DELETE.value %} class="removido"{% endif %}>
+    {% for campo in linha.visible_fields %}
+    {% if campo.name != 'DELETE' %}
+    <td class="col-{{ campo.name }}{% if campo.errors %} com-erro{% endif %}">
+        {{ campo }}
+        {% for erro in campo.errors %}<div class="erro-campo">{{ erro }}</div>{% endfor %}
+    </td>
+    {% endif %}
+    {% endfor %}
+    <td>
+        {% for oculto in linha.hidden_fields %}{{ oculto }}{% endfor %}
+        <span hidden>{{ linha.DELETE }}</span>
+        <button class="btn btn-secundario btn-sm" type="button" data-remover-linha title="Remover linha" aria-label="Remover linha">
+            <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+        </button>
+    </td>
+</tr>

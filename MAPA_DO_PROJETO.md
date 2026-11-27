@@ -22,8 +22,10 @@ O núcleo é o fluxo **triagem → fila → atendimento**:
 |---|---|---|---|
 | CONTROLE DE ATENDIMENTOS DIÁRIO | `triagem` | `Atendimento` | Operacional (registrar, filas, atender, controle) |
 | REGISTRO DE ATENDIMENTOS | `atendimentos` | `RegistroAtendimento` | Só listagem; criado automaticamente ao atender |
-| CERTIDÕES | `certidoes` | `Certidao` | Lista, cria e edita |
-| DSF CONCLUÍDO | `dsf` | `Dsf` | Lista e cria (sem edição) |
+| CERTIDÕES | `certidoes` | `Certidao` | Ficha de solicitação de 2ª via, acompanhamento até a entrega: lista, cria e edita |
+| DSF CONCLUÍDO | `dsf` | `Dsf`, `MembroFamiliar` | Menu "DSF": ficha do Diagnóstico Sócio Familiar, com lista, criação e edição enquanto pendente |
+| *(documento Word)* | `dmae` | `IsencaoDmae`, `MembroDmae`, `EvolucaoDmae` | Menu "Isenção DMAE": Requerimento DMAE, com lista, criação e edição enquanto pendente |
+| *(documento Word)* | `propao` | `RequerimentoProPao`, `PessoaProPao`, `ProcedimentoProPao` | Menu "PRÓ-PÃO": requerimento, com lista, criação e edição enquanto pendente |
 | 2026 TAP MENSAL | `tap` | `TapDiario` | Grade mensal editável |
 | 1S2024 ATENDIMENTO ADMINISTRATI | `administrativo` | `RegistroAdministrativo` | Histórico só leitura, com busca e paginação |
 | *(nova)* | `usuarios` | `Usuario` | Usuário customizado com `cargo` |
@@ -83,6 +85,8 @@ Gestao Cras Django/
 ├── atendimentos/                      # RegistroAtendimento
 ├── certidoes/                         # Certidao
 ├── dsf/                               # Dsf
+├── dmae/                              # IsencaoDmae (Requerimento DMAE)
+├── propao/                            # RequerimentoProPao
 ├── tap/                               # TapDiario
 ├── administrativo/                    # RegistroAdministrativo (histórico 1S2024)
 ├── templates/                         # todos os templates (base.html + 1 pasta por app)
@@ -102,6 +106,13 @@ erDiagram
     Usuario ||--o{ RegistroAtendimento : responsavel
     Usuario ||--o{ Certidao : servidor
     Usuario ||--o{ Dsf : tecnico_responsavel
+    Dsf ||--o{ MembroFamiliar : membros
+    Usuario ||--o{ IsencaoDmae : servidor
+    IsencaoDmae ||--o{ MembroDmae : membros
+    IsencaoDmae ||--o{ EvolucaoDmae : evolucoes
+    Usuario ||--o{ RequerimentoProPao : servidor
+    RequerimentoProPao ||--o{ PessoaProPao : pessoas
+    RequerimentoProPao ||--o{ ProcedimentoProPao : procedimentos
     Atendimento ||--o{ RegistroAtendimento : "atendimento_origem"
 
     Usuario {
@@ -128,16 +139,71 @@ erDiagram
     }
     Certidao {
         date data_solicitacao
+        bool tipos "nascimento, casamento, óbito, averbação"
+        string demais_campos "dados do registrado(a) e CadÚnico"
+        bool ficha_preenchida "False = veio da planilha"
         string quem_solicitou
         string de_quem
         date data_recebimento
         date data_entrega "null = pendente"
     }
     Dsf {
-        string nome
-        string beneficio_solicitado "CESTA BÁSICA | FRALDA | ABSORVENTE"
         date data
-        string resultado "DEFERIDO | INDEFERIDO"
+        string nome
+        string cpf
+        string beneficio_solicitado "CESTA BÁSICA | FRALDA | ABSORVENTE"
+        string resultado "vazio = pendente | DEFERIDO | INDEFERIDO"
+        bool ficha_preenchida "False = veio da planilha"
+        string demais_campos "seções I a VII da ficha de papel"
+    }
+    MembroFamiliar {
+        string nome
+        string parentesco
+        int idade
+        string ocupacao
+        string escolaridade
+        decimal renda
+    }
+    IsencaoDmae {
+        date data
+        string solicitacao "PRIMEIRA | RENOVACAO"
+        string codigo_imovel
+        string nome
+        string consumo "3 meses (MM/AAAA e m3); média calculada"
+        text parecer_social
+        string resultado "vazio = pendente | DEFERIDO | INDEFERIDO"
+        string demais_campos "identificação, renda e situação habitacional"
+    }
+    MembroDmae {
+        string nome
+        string parentesco
+        int idade
+        string profissao
+        decimal renda
+    }
+    EvolucaoDmae {
+        date data
+        text procedimento
+    }
+    RequerimentoProPao {
+        date data
+        string solicitacao "PRIMEIRA | RENOVACAO"
+        string nome
+        string situacao_imovel "PROPRIA | CEDIDA | ALUGADA | FINANCIADA | OCUPACAO"
+        string segundo_imovel "NAO | SIM, com titular e/ou conjuge"
+        string resultado "vazio = pendente | DEFERIDO | INDEFERIDO"
+        string demais_campos "identificação, renda e análise do sistema"
+    }
+    PessoaProPao {
+        string nome
+        string parentesco
+        int idade
+        string ocupacao
+        decimal renda
+    }
+    ProcedimentoProPao {
+        date data
+        text procedimento
     }
     TapDiario {
         date data "unique"
@@ -178,8 +244,10 @@ Todas as views usam `@login_required`. Fora a regra de fila (seção 6), **qualq
 | `/triagem/atender/<pk>/` | `triagem.atender` | — (POST) | Marca como ATENDIDO e cria `RegistroAtendimento` |
 | `/triagem/controle/?data=` | `triagem.controle` | `triagem/controle.html` | Tabela do dia (equivale à aba CONTROLE DIÁRIO) |
 | `/atendimentos/?data=` | `atendimentos.lista` | `atendimentos/lista.html` | Lista de registros de atendimento |
-| `/certidoes/`, `nova/`, `<pk>/editar/` | `certidoes.*` | `certidoes/lista.html`, `form.html` | CRUD sem exclusão; conta pendentes (sem `data_entrega`) |
-| `/dsf/`, `novo/` | `dsf.*` | `dsf/lista.html`, `form.html` | Lista com contagem de deferidos/indeferidos e cadastro |
+| `/certidoes/`, `nova/`, `<pk>/editar/` | `certidoes.*` | `certidoes/lista.html`, `form.html` | Ficha completa (acompanhamento só na edição), sem exclusão; conta pendentes (sem `data_entrega`) |
+| `/dsf/`, `novo/`, `<pk>/editar/` | `dsf.lista`, `criar`, `editar` | `dsf/lista.html`, `form.html` | Lista com pendentes, deferidos e indeferidos; ficha completa; edição só de DSF pendente. Criar e editar: Assistente Social, Psicólogo(a) ou administrador |
+| `/isencao-dmae/`, `novo/`, `<pk>/editar/` | `dmae.lista`, `criar`, `editar` | `dmae/lista.html`, `form.html` | Lista com pendentes, deferidos e indeferidos; ficha completa; edição só de requerimento pendente. Qualquer usuário logado. O endereço antigo `/dsf/isencao-dmae/` redireciona para cá |
+| `/pro-pao/`, `novo/`, `<pk>/editar/` | `propao.lista`, `criar`, `editar` | `propao/lista.html`, `form.html` | Mesmo fluxo da DMAE (`cras/fichas.py`). O endereço antigo `/dsf/pro-pao/` redireciona para cá. DSF, Certidões, Isenção DMAE e PRÓ-PÃO são opções do menu *Gestão* |
 | `/tap/?ano=&mes=` | `tap.mensal` | `tap/mensal.html` | Grade de 28–31 campos; salva todos os dias do mês |
 | `/administrativo/?q=` | `administrativo.lista` | `administrativo/lista.html` | Busca por nome/CPF/motivo, 50 por página |
 
@@ -220,7 +288,7 @@ O sistema grava sozinho:
 Detalhes da implementação:
 
 - **Triagem (desde 23/11/2026):** a tela pergunta o **tipo de fila** (Atendimento administrativo ou psicossocial) e a **prioridade** (sem prioridade, 60+, 80+, PcD, Autista, Gestante ou criança de colo, Libras). O banco continua guardando o status combinado, no vocabulário da planilha, via `STATUS_DA_FILA` em [triagem/models.py](triagem/models.py). Exemplo: psicossocial + 60+ = `AGUARDANDO ATENDIMENTO PSICOSSOCIAL 60+`.
-  - A caixa *Resolvido na própria triagem* grava `ATENDIDO TRIAGEM / ORIENTAÇÃO`, sem entrar na fila.
+  - A caixa *Orientações Realizadas na triagem* grava `ATENDIDO TRIAGEM / ORIENTAÇÃO`, sem entrar na fila.
   - `REUNIÃO` não é mais oferecido na triagem; continua no modelo só para registros antigos.
 - **Motivos do atendimento:** no *Atender*, os motivos são de múltipla escolha. Ficam em `RegistroAtendimento.motivo`, separados por `; ` e na ordem de `MOTIVOS`, e a propriedade `.motivos` devolve a lista.
 - **Ordem de chamada (tela Filas):** `listas_de_chamada()` em [triagem/models.py](triagem/models.py) separa quem aguarda em duas listas, **Administrativo** e **Psicossocial**, e ordena cada uma por:
@@ -230,7 +298,7 @@ Detalhes da implementação:
 
   Dentro de cada grupo vale a ordem de chegada (senha). Regra definida pelo usuário em 17/11/2026.
 - **Painel:** mostra as mesmas duas filas (`listas_de_chamada()`), com os 5 próximos a chamar em cada uma. Até 23/11/2026 havia um card por status; `filas_do_dia()` foi removida.
-- **DSF:** *Benefício solicitado* é uma lista de seleção (`Dsf.Beneficio`): Cesta Básica, Fralda ou Absorvente.
+- **DSF:** *Benefício solicitado* é uma lista de seleção (`Dsf.Beneficio`): Cesta Básica, Fralda ou Absorvente. A ficha nasce pendente; parecer (deferimento) e PDF ainda não existem. Detalhes na seção 4.6 do CLAUDE.md.
 - **Atendimento:** `atender` faz um `UPDATE ... WHERE status = <status lido>` dentro de `transaction.atomic`. Se outro servidor já tirou a pessoa da fila, o UPDATE não afeta nenhuma linha e nada é gravado.
 - **Número da senha:** a constraint `triagem_numero_unico_por_dia` garante que o número não se repete no dia. Em caso de colisão, o `save()` tenta o próximo número livre (até 5 vezes).
 
@@ -347,13 +415,15 @@ Regras de cálculo:
 | `RegistroAtendimento` | 1 (09/11/2026; lixo de importação com nome vazio, ver C1) |
 | `Certidao` | 0 |
 | `Dsf` | 0 |
+| `IsencaoDmae` | 0 |
+| `RequerimentoProPao` | 0 |
 | `Usuario` | 1 (`admin`, sem cargo) |
 
 `manage.py check`: sem problemas. `makemigrations --check`: nenhuma migração pendente. Todas as migrações estão aplicadas, incluindo a `triagem/0003_hora_entrada_editavel_numero_unico` e a `triagem/0004_remove_agendamento_online`.
 
 > Em 23/11/2026 o banco recebeu a demonstração do `demo_triagens`: cerca de 950 triagens e 670 registros de atendimento fictícios, além dos números acima. Para voltar ao estado real: `python manage.py demo_triagens --remover`.
 
-Testes: `python manage.py test` → **52 testes, todos passando** (ficam em [triagem/tests.py](triagem/tests.py), [tap/tests.py](tap/tests.py), [cras/tests.py](cras/tests.py) para os gráficos do Painel, [usuarios/tests.py](usuarios/tests.py) para as contas e [dsf/tests.py](dsf/tests.py)).
+Testes: `python manage.py test` → **104 testes, 103 passando** em 26/11/2026 (a falha é a das filas no Painel; ver CLAUDE.md). Ficam em [triagem/tests.py](triagem/tests.py), [tap/tests.py](tap/tests.py), [cras/tests.py](cras/tests.py) para os gráficos do Painel, [usuarios/tests.py](usuarios/tests.py) para as contas [dsf/tests.py](dsf/tests.py), [certidoes/tests.py](certidoes/tests.py), [dmae/tests.py](dmae/tests.py) e [propao/tests.py](propao/tests.py).
 
 > ⚠️ O `importar_planilha` **já foi executado**. Agora o comando se recusa a rodar de novo sem `--forcar`.
 
@@ -389,14 +459,14 @@ Todos foram confirmados lendo o código e, quando possível, executando trechos 
 | B1 ✅ | **Versionamento** | Desde 23/11/2026 a pasta tem repositório git próprio, publicado em [github.com/rdssystems/Cras-Django](https://github.com/rdssystems/Cras-Django). O repositório é **público**. O `.gitignore` exclui `db.sqlite3`, `*.xlsx` e `summary.json`, que têm nome, CPF e telefone de cidadãos. Confira o `git status` antes de cada commit. |
 | B2 ✅ | **Configuração de produção** | Resolvido em 26/11/2026. O `settings.py` lê DEBUG, chave, hosts, origens CSRF e caminho do banco de variáveis de ambiente, e sem chave em produção o sistema não sobe. Produção usa gunicorn + whitenoise via `compose.prod.yaml`, publicada na VPS pelo Tailscale Funnel (detalhes na seção 7.1 do CLAUDE.md). A chave `django-insecure-…` do código continua pública, mas só vale no modo de desenvolvimento. |
 | B3 | **Testes** | ◐ Hoje há 19 testes cobrindo triagem, filas, atendimento, numeração, importador e TAP. Certidões, DSF, administrativo e atendimentos continuam sem testes. |
-| B4 | **Permissões** | Fora a regra de fila, qualquer usuário logado edita certidões, DSF, TAP e vê todo o histórico com CPF. Não há trilha de auditoria. |
+| B4 ◐ | **Permissões** | Há regra para as filas, para a ficha do DSF (Assistente Social, Psicólogo(a) ou administrador) e para o histórico (só administrador). No resto, qualquer usuário logado edita certidões, Isenção DMAE (com o parecer social), PRÓ-PÃO (com a análise do sistema) e TAP. Não há trilha de auditoria. |
 | B5 ◐ | **Importador não idempotente** | Há uma trava que exige `--forcar` para reimportar, e desde 26/11/2026 a importação roda numa transação única (tudo ou nada). Mesmo assim, só o TAP usa `update_or_create`, e o resto duplica quando forçado. Também desde 26/11/2026 importa **Certidões** e **DSF**, com os nomes de servidor e técnico nos campos `*_legado` e o texto das colunas de data em `observacoes`. |
 | B6 | **Performance** | `/atendimentos/` lista **tudo**, sem paginação. Com a aba REGISTRO DE ATENDIMENTOS importada (~42 mil linhas), a página fica pesada. O filtro de data também não mantém o valor escolhido. A demonstração confirmou o problema: com 675 registros, a página tem 61 mil px de altura e leva 1,6 s para carregar. |
 | B12 | **Controle diário com dia cheio** | Visto com a demonstração: a tabela fica mais larga que o card. A coluna "Servidor triagem" sai cortada (há rolagem lateral), o CPF quebra em duas linhas e os nomes em três. |
 | B7 | **Sem atualização automática** | Não há auto-refresh, polling nem websocket: as filas só mudam com F5. A pílula enganosa "Tempo real" foi removida da topbar em 17/11/2026. |
 | B8 ✅ | **Listas duplicadas** | Corrigido em 23/11/2026: o modal *Atender* monta tipos e motivos a partir de `RegistroAtendimento.Tipo.choices` e `RegistroAtendimento.MOTIVOS`. |
 | B9 | **Indicador "Atendidos"** | Não conta `ATENDIDO TRIAGEM / ORIENTAÇÃO`. Isso é decisão de negócio, mas hoje o % do Painel exclui quem foi resolvido na triagem. |
-| B10 | **Funcionalidades ausentes** | Edição de DSF, exclusão em geral, `servidor2`, relatórios mensais e exportação. |
+| B10 | **Funcionalidades ausentes** | Deferimento e PDF do DSF, das certidões, da Isenção DMAE e do PRÓ-PÃO, exclusão em geral, `servidor2`, relatórios mensais e exportação. |
 | B11 ✅ | **Código** | O `__import__` em certidões foi trocado por `timezone.localdate()`. Os horários da triagem passaram a usar `timezone.localtime()` em vez de `datetime.now()`. |
 
 ---

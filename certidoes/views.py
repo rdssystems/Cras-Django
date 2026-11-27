@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
-from .forms import CertidaoForm
+from .forms import CIDADE_PADRAO, CertidaoForm
 from .models import Certidao
 
 
@@ -21,11 +21,12 @@ def criar(request):
         if form.is_valid():
             certidao = form.save(commit=False)
             certidao.servidor = request.user
+            certidao.ficha_preenchida = True
             certidao.save()
             messages.success(request, 'Certidão registrada.')
             return redirect('certidoes:lista')
     else:
-        form = CertidaoForm(initial={'data_solicitacao': timezone.localdate()})
+        form = CertidaoForm(initial={'data_solicitacao': timezone.localdate(), 'cidade': CIDADE_PADRAO})
     return render(request, 'certidoes/form.html', {'form': form, 'titulo': 'Nova Certidão'})
 
 
@@ -40,4 +41,7 @@ def editar(request, pk):
             return redirect('certidoes:lista')
     else:
         form = CertidaoForm(instance=certidao)
-    return render(request, 'certidoes/form.html', {'form': form, 'titulo': 'Editar Certidão'})
+    return render(request, 'certidoes/form.html', {
+        'form': form, 'titulo': 'Editar Certidão',
+        'acompanhamento': True,  # recebimento e entrega só existem depois da solicitação
+    })

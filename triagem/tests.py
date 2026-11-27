@@ -1,5 +1,6 @@
 import tempfile
 from datetime import date, datetime, time
+from importlib import import_module
 from io import StringIO
 from pathlib import Path
 from unittest import mock
@@ -435,6 +436,12 @@ class TriagemFilaEPrioridadeTests(TestCase):
         resp = self.registrar(tipo_fila='PSICOSSOCIAL', prioridade='PCD')
         self.assertContains(resp, 'Senha Nº 1: Ana entrou na fila de atendimento psicossocial (PcD).')
 
+    def test_rotulo_da_caixa_de_orientacao_na_triagem(self):
+        self.client.force_login(Usuario.objects.create_user('recepcao', password='x'))
+        resp = self.client.get(reverse('triagem:registrar'))
+        self.assertContains(resp, 'Orientações Realizadas na triagem (não entra na fila)')
+        self.assertNotContains(resp, 'Resolvido na própria triagem')
+
     def test_resolvido_na_triagem_nao_entra_em_fila(self):
         self.registrar(tipo_fila='ADMINISTRATIVO', prioridade='60+', resolvido_na_triagem='on')
         self.assertEqual(Atendimento.objects.get().status, S.ATENDIDO_TRIAGEM)
@@ -453,11 +460,30 @@ class MotivosDoAtendimentoTests(TestCase):
     def test_atender_aceita_varios_motivos_na_ordem_da_lista(self):
         self.client.post(reverse('triagem:atender', args=[self.pessoa.pk]), {
             'tipo_atendimento': 'ATENDIMENTO ADMINISTRATIVO',
-            'motivo': ['CESTA BÁSICA', 'INVENTADO', 'ATUALIZAÇÃO CADASTRAL - CADÚNICO'],
+            'motivo': ['SOLICITAÇÃO DE CESTA BÁSICA', 'INVENTADO', 'ATUALIZAÇÃO CADASTRAL - CADÚNICO'],
         })
         registro = RegistroAtendimento.objects.get()
-        self.assertEqual(registro.motivo, 'ATUALIZAÇÃO CADASTRAL - CADÚNICO; CESTA BÁSICA')
-        self.assertEqual(registro.motivos, ['ATUALIZAÇÃO CADASTRAL - CADÚNICO', 'CESTA BÁSICA'])
+        self.assertEqual(registro.motivo, 'ATUALIZAÇÃO CADASTRAL - CADÚNICO; SOLICITAÇÃO DE CESTA BÁSICA')
+        self.assertEqual(registro.motivos, ['ATUALIZAÇÃO CADASTRAL - CADÚNICO', 'SOLICITAÇÃO DE CESTA BÁSICA'])
+
+    def test_lista_tem_os_motivos_novos_e_cesta_basica_renomeada(self):
+        novos = ['ORIENTAÇÃO BPC', 'CARTEIRINHA DO IDOSO', 'ORIENTAÇÕES PASSE LIVRE',
+                 'SOLICITAÇÃO DE CADASTRO EM DOMICÍLIO', 'PRÓ-PÃO', 'SOLICITAÇÃO DE CESTA BÁSICA']
+        for motivo in novos:
+            self.assertIn(motivo, RegistroAtendimento.MOTIVOS)
+        self.assertNotIn('CESTA BÁSICA', RegistroAtendimento.MOTIVOS)
+        self.assertEqual(RegistroAtendimento.MOTIVOS[-1], 'OUTRO')
+        html = self.client.get(reverse('triagem:filas')).content.decode()
+        self.assertIn('name="motivo" value="ORIENTAÇÕES PASSE LIVRE"', html)
+
+    def test_migracao_renomeia_so_o_item_exato(self):
+        migracao = import_module('atendimentos.migrations.0005_renomeia_motivo_cesta_basica')
+        trocar = migracao.trocar_item
+        self.assertEqual(trocar('DMAE; CESTA BÁSICA', migracao.ANTIGO, migracao.NOVO),
+                         'DMAE; SOLICITAÇÃO DE CESTA BÁSICA')
+        self.assertEqual(trocar('SOLICITAÇÃO DE CESTA BÁSICA', migracao.ANTIGO, migracao.NOVO),
+                         'SOLICITAÇÃO DE CESTA BÁSICA')  # já estava com o nome novo: não duplica
+        self.assertEqual(trocar('DMAE', migracao.ANTIGO, migracao.NOVO), 'DMAE')
 
     def test_modal_marca_o_tipo_conforme_a_fila(self):
         Atendimento.objects.create(nome='Psi', status=S.AGUARDANDO_PSICO)

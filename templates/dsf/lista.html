@@ -1,45 +1,24 @@
 {% extends 'base.html' %}
-{% block titulo %}DSF Concluído - CRAS{% endblock %}
+{% block titulo %}DSF - CRAS{% endblock %}
 {% block conteudo %}
 <div class="topo-pagina">
     <div>
-        <h1>DSF Concluído</h1>
+        <h1>DSF</h1>
     </div>
+    {% if pode_preencher %}
     <div class="topo-acoes">
         <a class="btn btn-primario" href="{% url 'dsf:criar' %}">
             <span class="material-symbols-outlined">add_circle</span> Novo DSF
         </a>
     </div>
+    {% endif %}
 </div>
-<div class="grid-metricas" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
-    <div class="metrica" style="--tonal: #e4f1e8">
-        <div class="metrica-topo">
-            <div>
-                <div class="metrica-rotulo" style="color:#2e7a4c">Deferidos</div>
-                <div class="metrica-valor" style="color:#2e7a4c">{{ deferidos }}</div>
-            </div>
-            <div class="metrica-icone" style="background:#e4f1e8;color:#2e7a4c">
-                <span class="material-symbols-outlined">thumb_up</span>
-            </div>
-        </div>
-    </div>
-    <div class="metrica" style="--tonal: #fbe9e3">
-        <div class="metrica-topo">
-            <div>
-                <div class="metrica-rotulo" style="color:#a53212">Indeferidos</div>
-                <div class="metrica-valor" style="color:#a53212">{{ indeferidos }}</div>
-            </div>
-            <div class="metrica-icone" style="background:#fbe9e3;color:#a53212">
-                <span class="material-symbols-outlined">thumb_down</span>
-            </div>
-        </div>
-    </div>
-</div>
+{% include '_cartoes_de_situacao.html' %}
 <div class="card">
     <div class="tabela-wrap">
         <table class="tabela">
             <thead>
-                <tr><th>Nome</th><th>Benefício solicitado</th><th>Data</th><th>Resultado</th><th>Técnico responsável</th></tr>
+                <tr><th>Nome</th><th>Benefício solicitado</th><th>Data</th><th>Situação</th><th>Técnico responsável</th><th></th></tr>
             </thead>
             <tbody>
                 {% for d in dsfs %}
@@ -48,18 +27,13 @@
                     <td>{{ d.get_beneficio_solicitado_display }}</td>
                     <td>{{ d.data|date:'d/m/Y' }}</td>
                     <td>
-                        {% if d.resultado == 'DEFERIDO' %}
-                        <span class="badge-pill badge-verde"><span class="dot"></span>{{ d.get_resultado_display }}</span>
-                        {% elif d.resultado == 'INDEFERIDO' %}
-                        <span class="badge-pill badge-vermelho"><span class="dot"></span>{{ d.get_resultado_display }}</span>
-                        {% else %}
-                        —{# importado da planilha sem resultado #}
-                        {% endif %}
+                        {% include '_situacao.html' with item=d %}
                     </td>
                     <td>{{ d.tecnico_nome|default:'—' }}</td>
+                    <td>{% if d.pendente and pode_preencher %}<a class="btn btn-secundario btn-sm" href="{% url 'dsf:editar' d.id %}">Editar</a>{% endif %}</td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="5"><div class="vazio"><span class="material-symbols-outlined">task</span>Nenhum DSF registrado.<br><a class="btn btn-primario mt-2" href="{% url 'dsf:criar' %}">Registrar primeiro DSF</a></div></td></tr>
+                <tr><td colspan="6"><div class="vazio"><span class="material-symbols-outlined">task</span>Nenhum DSF registrado.</div></td></tr>
                 {% endfor %}
             </tbody>
         </table>

@@ -20,7 +20,7 @@
         <table class="tabela">
             <thead>
                 <tr>
-                    <th>Solicitação</th><th>Quem solicitou</th><th>De quem</th><th>Telefone</th>
+                    <th>Solicitação</th><th>Certidão</th><th>Quem solicitou</th><th>De quem</th><th>Telefone</th>
                     <th>Servidor</th><th>Cidade</th><th>Recebimento</th><th>Entrega</th><th>Entregue para</th><th></th>
                 </tr>
             </thead>
@@ -28,8 +28,9 @@
                 {% for c in certidoes %}
                 <tr>
                     <td>{{ c.data_solicitacao|date:'d/m/Y' }}</td>
-                    <td><strong>{{ c.quem_solicitou }}</strong></td>
-                    <td>{{ c.de_quem }}</td>
+                    <td>{{ c.tipos|default:'—' }}</td>
+                    <td class="col-pessoa"><strong>{{ c.quem_solicitou }}</strong></td>
+                    <td class="col-pessoa">{{ c.de_quem }}</td>
                     <td>{{ c.telefone|default:'—' }}</td>
                     <td>{{ c.servidor_nome|default:'—' }}</td>
                     <td>{{ c.cidade|default:'—' }}</td>
@@ -51,7 +52,7 @@
                     <td><a class="btn btn-secundario btn-sm" href="{% url 'certidoes:editar' c.id %}">Editar</a></td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="10"><div class="vazio"><span class="material-symbols-outlined">contract</span>Nenhuma certidão registrada.<br><a class="btn btn-primario mt-2" href="{% url 'certidoes:criar' %}">Registrar primeira certidão</a></div></td></tr>
+                <tr><td colspan="11"><div class="vazio"><span class="material-symbols-outlined">contract</span>Nenhuma certidão registrada.<br><a class="btn btn-primario mt-2" href="{% url 'certidoes:criar' %}">Registrar primeira certidão</a></div></td></tr>
                 {% endfor %}
             </tbody>
         </table>

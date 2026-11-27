@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block titulo %}Isenção DMAE - CRAS{% endblock %}
+{% block conteudo %}
+<div class="topo-pagina">
+    <div>
+        <h1>Isenção DMAE</h1>
+    </div>
+    <div class="topo-acoes">
+        <a class="btn btn-primario" href="{% url 'dmae:criar' %}">
+            <span class="material-symbols-outlined">add_circle</span> Novo Requerimento DMAE
+        </a>
+    </div>
+</div>
+{% include '_cartoes_de_situacao.html' %}
+<div class="card">
+    <div class="tabela-wrap">
+        <table class="tabela">
+            <thead>
+                <tr><th>Nome</th><th>Solicitação</th><th>Código do imóvel</th><th>Data</th><th>Consumo médio</th><th>Situação</th><th>Servidor</th><th></th></tr>
+            </thead>
+            <tbody>
+                {% for r in requerimentos %}
+                <tr>
+                    <td class="col-pessoa"><strong>{{ r.nome }}</strong></td>
+                    <td>{{ r.get_solicitacao_display }}</td>
+                    <td>{{ r.codigo_imovel|default:'—' }}</td>
+                    <td>{{ r.data|date:'d/m/Y' }}</td>
+                    <td>{% if r.consumo_medio is None %}—{% else %}{{ r.consumo_medio|floatformat:'-1' }} m³{% endif %}</td>
+                    <td>{% include '_situacao.html' with item=r %}</td>
+                    <td>{{ r.servidor|default:'—' }}</td>
+                    <td>{% if r.pendente %}<a class="btn btn-secundario btn-sm" href="{% url 'dmae:editar' r.id %}">Editar</a>{% endif %}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8"><div class="vazio"><span class="material-symbols-outlined">water_drop</span>Nenhum requerimento registrado.</div></td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

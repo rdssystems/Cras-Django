@@ -20,9 +20,14 @@ class RegistroAtendimento(models.Model):
         'CERTIDÃO DE CASAMENTO',
         'PSICOSSOCIAL',
         'FOLHA RESUMO',
-        'CESTA BÁSICA',
+        'SOLICITAÇÃO DE CESTA BÁSICA',  # era "CESTA BÁSICA" (renomeado em 26/11/2026, migração 0005)
         'CERTIDÃO DE ÓBITO',
-        'OUTRO',
+        'ORIENTAÇÃO BPC',
+        'CARTEIRINHA DO IDOSO',
+        'ORIENTAÇÕES PASSE LIVRE',
+        'SOLICITAÇÃO DE CADASTRO EM DOMICÍLIO',
+        'PRÓ-PÃO',
+        'OUTRO',  # sempre por último
     ]
 
     data = models.DateField('Data', default=timezone.localdate)

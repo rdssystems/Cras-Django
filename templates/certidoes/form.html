@@ -1,27 +1,87 @@
 {% extends 'base.html' %}
-{% block titulo %}Certidão - CRAS{% endblock %}
+{% load cras_extras %}
+{% block titulo %}{{ titulo }} - CRAS{% endblock %}
 {% block conteudo %}
 <div class="topo-pagina">
     <div>
         <h1>{{ titulo }}</h1>
+        <p class="topo-sub">Solicitação de Registro Civil</p>
     </div>
 </div>
-<div class="card" style="max-width:900px">
-    <div class="card-pad">
-        <form method="post">
-            {% csrf_token %}
-            <div class="form-row">
-                {% for campo in form %}
-                {% include '_campo.html' with campo=campo %}
-                {% endfor %}
+<form method="post" class="ficha" novalidate>
+    {% csrf_token %}
+    {% if form.errors %}
+    <div class="alerta alerta-erro" role="alert"><span class="material-symbols-outlined">error</span> A certidão não foi salva. Confira os campos destacados.</div>
+    {% endif %}
+
+    <section class="card card-pad">
+        <h3>Solicitação</h3>
+        <fieldset class="campo campo-grupo{% if form.non_field_errors %} com-erro{% endif %}">
+            <legend>2ª via de certidão <span class="obrigatorio">*</span></legend>
+            <div class="opcoes-linha">
+                <label class="opcao-marcar">{{ form.certidao_nascimento }} <span>de Nascimento</span></label>
+                <label class="opcao-marcar">{{ form.certidao_casamento }} <span>de Casamento</span></label>
+                <label class="opcao-marcar">{{ form.certidao_obito }} <span>de Óbito</span></label>
+                <label class="opcao-marcar">{{ form.com_averbacao }} <span>Com averbação</span></label>
             </div>
-            <div class="form-acoes">
-                <button class="btn btn-primario" type="submit">
-                    <span class="material-symbols-outlined">save</span> Salvar
-                </button>
-                <a class="btn btn-secundario" href="{% url 'certidoes:lista' %}">Voltar</a>
-            </div>
-        </form>
+            {% for erro in form.non_field_errors %}<div class="erro-campo">{{ erro }}</div>{% endfor %}
+        </fieldset>
+        <div class="form-row duas">
+            {% include '_campo.html' with campo=form.data_solicitacao %}
+            {% include '_campo.html' with campo=form.cidade %}
+        </div>
+    </section>
+
+    <section class="card card-pad">
+        <h3>Registrado(a)</h3>
+        {% include '_campo.html' with campo=form.de_quem %}
+        {% include '_campo.html' with campo=form.filiacao %}
+        <div class="form-row">
+            {% include '_campo.html' with campo=form.data_nascimento %}
+            {% include '_campo.html' with campo=form.cpf %}
+            {% include '_campo.html' with campo=form.telefone %}
+        </div>
+        <div class="form-row duas">
+            {% include '_campo.html' with campo=form.endereco %}
+            {% include '_campo.html' with campo=form.bairro %}
+            {% include '_opcoes.html' with campo=form.cad_unico %}
+            {% include '_campo.html' with campo=form.nis %}
+        </div>
+    </section>
+
+    <section class="card card-pad">
+        <h3>Responsável</h3>
+        <div class="form-row duas">
+            {% include '_campo.html' with campo=form.quem_solicitou %}
+            {% include '_campo.html' with campo=form.parentesco %}
+        </div>
+    </section>
+
+    {% if acompanhamento %}
+    <section class="card card-pad">
+        <h3>Acompanhamento</h3>
+        <div class="form-row">
+            {% include '_campo.html' with campo=form.data_recebimento %}
+            {% include '_campo.html' with campo=form.nome_contato %}
+            {% include '_campo.html' with campo=form.contato_em %}
+        </div>
+        <div class="form-row duas">
+            {% include '_campo.html' with campo=form.data_entrega %}
+            {% include '_campo.html' with campo=form.entregue_para %}
+        </div>
+        {% include '_campo.html' with campo=form.observacoes %}
+    </section>
+    {% endif %}
+
+    <div class="form-acoes">
+        <button class="btn btn-primario" type="submit">
+            <span class="material-symbols-outlined">save</span> Salvar
+        </button>
+        <a class="btn btn-secundario" href="{% url 'certidoes:lista' %}">Voltar</a>
     </div>
-</div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static_v 'cras/js/ficha.js' %}"></script>
 {% endblock %}

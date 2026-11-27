@@ -692,6 +692,8 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; }
 .menu-admin-itens { position: absolute; top: calc(100% + .35rem); right: 0; min-width: 12rem; padding: .4rem; background: #fff; border: 1px solid var(--border); border-radius: .5rem; box-shadow: var(--shadow-3); }
 .menu-admin-itens .sidebar-link { color: var(--on-surface); padding: .7rem .8rem; }
 .menu-admin-itens .sidebar-link:hover, .menu-admin-itens .sidebar-link.ativo { color: var(--primary-dark); background: var(--primary-soft); }
+/* Nos menus de fundo claro o ícone acompanha a cor do texto, também no item marcado. */
+.menu-gestao-itens .sidebar-link .material-symbols-outlined, .menu-admin-itens .sidebar-link .material-symbols-outlined { color: inherit; }
 .app-topbar .menu-botao { display: none; }
 @media (max-width: 1100px) {
   .app-topbar { flex-wrap: wrap; }
@@ -718,3 +720,27 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; }
 .aba-painel { display: inline-flex; align-items: center; min-height: 44px; padding: .65rem 1.1rem; border: 1px solid var(--border); border-bottom: 0; border-radius: .65rem .65rem 0 0; background: #e6e9f6; color: var(--primary-dark); font-size: .875rem; font-weight: 500; white-space: nowrap; text-decoration: none; }
 .aba-painel:hover { background: #d7dcf1; color: var(--primary-dark); text-decoration: none; }
 .aba-painel.ativa, .aba-painel.ativa:hover { position: relative; background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 600; }
+
+/* Fichas (DSF, Certidões, DMAE): formulário longo em cartões, na ordem do papel. */
+.ficha { max-width: 1040px; }
+.ficha .card { margin-bottom: 1rem; }
+.ficha .card h3 { margin: 0 0 1rem; font-size: 1rem; font-weight: 600; color: var(--primary-dark); }
+.ficha-parte { margin: 1.5rem 0 .75rem; font-size: 1.125rem; font-weight: 600; }
+.ficha .form-row { align-items: start; row-gap: 0; }
+.ficha .form-row.duas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.opcoes-linha { display: flex; flex-wrap: wrap; gap: 8px; }
+.opcoes-linha .opcao-marcar { min-height: 42px; padding-inline: 14px; font-size: 13.5px; }
+.tabela-linhas td { padding: 6px; vertical-align: top; }
+.tabela-linhas th { padding-inline: 8px; }
+.tabela-linhas .form-control { min-width: 6.5rem; padding-inline: 8px; }
+.tabela-linhas .col-nome .form-control { min-width: 12rem; }
+.tabela-linhas .col-idade { width: 5rem; }
+.tabela-linhas .col-idade .form-control { min-width: 4rem; }
+.tabela-linhas tr.removido { display: none; }
+.tabela-linhas .col-data { width: 11rem; }
+.tabela-linhas .col-procedimento { width: 100%; }
+.tabela-linhas .col-procedimento .form-control { min-width: 15rem; }
+.ficha-adicionar { margin: .75rem 0 1.25rem; }
+.ficha-resultado { margin: .25rem 0 0; font-weight: 600; }
+@media (max-width: 575px) { .ficha .form-row.duas { grid-template-columns: minmax(0, 1fr); } }
+.tabela td.col-pessoa { min-width: 12rem; }

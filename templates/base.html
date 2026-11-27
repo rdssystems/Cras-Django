@@ -34,16 +34,22 @@
             <span class="material-symbols-outlined" aria-hidden="true">person_add</span> Nova Triagem
         </a>
         <details class="menu-gestao">
-        <summary class="sidebar-link {% if request.resolver_match.view_name|startswith:'atendimentos' or request.resolver_match.view_name|startswith:'certidoes' or request.resolver_match.view_name|startswith:'dsf' or request.resolver_match.view_name|startswith:'tap' %}ativo{% endif %}"><span class="material-symbols-outlined" aria-hidden="true">folder</span> Gestão <span class="material-symbols-outlined seta-menu" aria-hidden="true">expand_more</span></summary>
+        <summary class="sidebar-link {% if request.resolver_match.view_name|startswith:'atendimentos' or request.resolver_match.view_name|startswith:'certidoes' or request.resolver_match.view_name|startswith:'dsf' or request.resolver_match.view_name|startswith:'dmae' or request.resolver_match.view_name|startswith:'propao' or request.resolver_match.view_name|startswith:'tap' %}ativo{% endif %}"><span class="material-symbols-outlined" aria-hidden="true">folder</span> Gestão <span class="material-symbols-outlined seta-menu" aria-hidden="true">expand_more</span></summary>
         <div class="menu-gestao-itens">
         <a class="sidebar-link {% if request.resolver_match.view_name|startswith:'atendimentos' %}ativo{% endif %}" href="{% url 'atendimentos:lista' %}">
             <span class="material-symbols-outlined" aria-hidden="true">description</span> Atendimentos
         </a>
+        <a class="sidebar-link {% if request.resolver_match.namespace == 'dsf' %}ativo{% endif %}" href="{% url 'dsf:lista' %}">
+            <span class="material-symbols-outlined" aria-hidden="true">task</span> DSF
+        </a>
         <a class="sidebar-link {% if request.resolver_match.view_name|startswith:'certidoes' %}ativo{% endif %}" href="{% url 'certidoes:lista' %}">
             <span class="material-symbols-outlined" aria-hidden="true">contract</span> Certidões
         </a>
-        <a class="sidebar-link {% if request.resolver_match.view_name|startswith:'dsf' %}ativo{% endif %}" href="{% url 'dsf:lista' %}">
-            <span class="material-symbols-outlined" aria-hidden="true">task</span> DSF Concluído
+        <a class="sidebar-link {% if request.resolver_match.namespace == 'dmae' %}ativo{% endif %}" href="{% url 'dmae:lista' %}">
+            <span class="material-symbols-outlined" aria-hidden="true">water_drop</span> Isenção DMAE
+        </a>
+        <a class="sidebar-link {% if request.resolver_match.namespace == 'propao' %}ativo{% endif %}" href="{% url 'propao:lista' %}">
+            <span class="material-symbols-outlined" aria-hidden="true">bakery_dining</span> PRÓ-PÃO
         </a>
         <a class="sidebar-link {% if request.resolver_match.view_name|startswith:'tap' %}ativo{% endif %}" href="{% url 'tap:mensal' %}">
             <span class="material-symbols-outlined" aria-hidden="true">calendar_month</span> TAP Mensal

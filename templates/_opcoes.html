@@ -1,0 +1,10 @@
+{# Pergunta de escolha única mostrada como opções de marcar. #}
+<fieldset class="campo campo-grupo{% if campo.errors %} com-erro{% endif %}">
+    <legend>{{ campo.label }}{% if campo.field.required %} <span class="obrigatorio">*</span>{% endif %}</legend>
+    <div class="opcoes-linha">
+        {% for opcao in campo %}
+        <label class="opcao-marcar" for="{{ opcao.id_for_label }}">{{ opcao.tag }} <span>{{ opcao.choice_label }}</span></label>
+        {% endfor %}
+    </div>
+    {% for erro in campo.errors %}<div class="erro-campo">{{ erro }}</div>{% endfor %}
+</fieldset>

@@ -1,0 +1,17 @@
+{# Tabela de ficha com linhas que entram e saem (usa o ficha.js). Uso: {% include '_tabela_linhas.html' with formset=membros botao='Adicionar pessoa' icone='person_add' %} #}
+{{ formset.management_form }}
+{% for erro in formset.non_form_errors %}<div class="alerta alerta-erro">{{ erro }}</div>{% endfor %}
+<div class="tabela-wrap">
+    <table class="tabela tabela-linhas">
+        <thead>
+            <tr>{% for campo in formset.empty_form.visible_fields %}{% if campo.name != 'DELETE' %}<th>{{ campo.label }}</th>{% endif %}{% endfor %}<th></th></tr>
+        </thead>
+        <tbody data-linhas="{{ formset.prefix }}">
+            {% for linha in formset %}{% include '_linha.html' %}{% endfor %}
+        </tbody>
+    </table>
+</div>
+<template data-modelo="{{ formset.prefix }}">{% with linha=formset.empty_form %}{% include '_linha.html' %}{% endwith %}</template>
+<button class="btn btn-secundario btn-sm ficha-adicionar" type="button" data-adicionar="{{ formset.prefix }}">
+    <span class="material-symbols-outlined" aria-hidden="true">{{ icone }}</span> {{ botao }}
+</button>

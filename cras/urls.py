@@ -13,6 +13,8 @@ urlpatterns = [
     path('atendimentos/', include('atendimentos.urls')),
     path('certidoes/', include('certidoes.urls')),
     path('dsf/', include('dsf.urls')),
+    path('isencao-dmae/', include('dmae.urls')),
+    path('pro-pao/', include('propao.urls')),
     path('tap/', include('tap.urls')),
     path('administrativo/', include('administrativo.urls')),
     path('usuarios/', include('usuarios.urls')),

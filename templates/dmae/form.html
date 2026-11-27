@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load cras_extras %}
+{% block titulo %}{{ titulo }} - CRAS{% endblock %}
+{% block conteudo %}
+<div class="topo-pagina">
+    <div>
+        <h1>{{ titulo }}</h1>
+    </div>
+</div>
+<form method="post" class="ficha" novalidate>
+    {% csrf_token %}
+    {% if form.errors or membros.total_error_count or evolucoes.total_error_count %}
+    <div class="alerta alerta-erro" role="alert"><span class="material-symbols-outlined">error</span> O requerimento não foi salvo. Confira os campos destacados.</div>
+    {% endif %}
+    {% for erro in form.non_field_errors %}<div class="alerta alerta-erro">{{ erro }}</div>{% endfor %}
+
+    <section class="card card-pad">
+        <h3>Solicitação</h3>
+        {% include '_opcoes.html' with campo=form.solicitacao %}
+        <div class="form-row duas">
+            {% include '_campo.html' with campo=form.data %}
+            {% include '_campo.html' with campo=form.codigo_imovel %}
+        </div>
+    </section>
+
+    <section class="card card-pad">
+        <h3>I. Identificação</h3>
+        {% include '_campo.html' with campo=form.nome %}
+        <div class="form-row duas">
+            {% include '_campo.html' with campo=form.endereco %}
+            {% include '_campo.html' with campo=form.bairro %}
+            {% include '_campo.html' with campo=form.cpf %}
+            {% include '_campo.html' with campo=form.naturalidade %}
+            {% include '_campo.html' with campo=form.cargo %}
+            {% include '_campo.html' with campo=form.telefone %}
+        </div>
+        {% include '_opcoes.html' with campo=form.estado_civil %}
+        <div class="form-row duas">
+            {% include '_opcoes.html' with campo=form.cad_unico %}
+            {% include '_campo.html' with campo=form.nis %}
+        </div>
+    </section>
+
+    <section class="card card-pad">
+        <h3>II. Composição familiar</h3>
+        {% include '_tabela_linhas.html' with formset=membros botao='Adicionar pessoa' icone='person_add' %}
+        <div class="form-row duas">
+            {% include '_campo.html' with campo=form.renda_familiar %}
+        </div>
+    </section>
+
+    <section class="card card-pad">
+        <h3>III. Situação habitacional</h3>
+        {% include '_opcoes.html' with campo=form.tipo_imovel %}
+        {% include '_opcoes.html' with campo=form.situacao_imovel %}
+        {% include '_opcoes.html' with campo=form.mais_de_um_imovel %}
+    </section>
+
+    <section class="card card-pad">
+        <h3>IV. Consumo de água</h3>
+        <div class="form-row duas">
+            {% include '_campo.html' with campo=form.consumo1_mes %}
+            {% include '_campo.html' with campo=form.consumo1_m3 %}
+            {% include '_campo.html' with campo=form.consumo2_mes %}
+            {% include '_campo.html' with campo=form.consumo2_m3 %}
+            {% include '_campo.html' with campo=form.consumo3_mes %}
+            {% include '_campo.html' with campo=form.consumo3_m3 %}
+        </div>
+        <p class="ficha-resultado">Consumo médio: <output id="consumo-medio">{% if registro.consumo_medio is None %}—{% else %}{{ registro.consumo_medio|floatformat:'-1' }} m³{% endif %}</output></p>
+    </section>
+
+    <section class="card card-pad">
+        <h3>V. Evolução</h3>
+        {% include '_tabela_linhas.html' with formset=evolucoes botao='Adicionar linha' icone='add' %}
+    </section>
+
+    <section class="card card-pad">
+        <h3>VI. Parecer social</h3>
+        <div class="campo{% if form.parecer_social.errors %} com-erro{% endif %}">
+            {{ form.parecer_social }}
+            {% for erro in form.parecer_social.errors %}<div class="erro-campo">{{ erro }}</div>{% endfor %}
+        </div>
+    </section>
+
+    <div class="form-acoes">
+        <button class="btn btn-primario" type="submit">
+            <span class="material-symbols-outlined">save</span> Salvar
+        </button>
+        <a class="btn btn-secundario" href="{% url 'dmae:lista' %}">Voltar</a>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static_v 'cras/js/ficha.js' %}"></script>
+<script>
+var consumos = document.querySelectorAll('[data-consumo]');
+consumos.forEach(function (campo) {
+    campo.addEventListener('input', function () {
+        var meses = Array.from(consumos).filter(function (c) { return c.value !== ''; });
+        var soma = meses.reduce(function (total, c) { return total + Number(c.value); }, 0);
+        document.getElementById('consumo-medio').textContent = meses.length
+            ? (soma / meses.length).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + ' m³'
+            : '—';
+    });
+});
+</script>
+{% endblock %}

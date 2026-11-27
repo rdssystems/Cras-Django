@@ -1,0 +1,9 @@
+{% if item.resultado == 'DEFERIDO' %}
+<span class="badge-pill badge-verde"><span class="dot"></span>{{ item.get_resultado_display }}</span>
+{% elif item.resultado == 'INDEFERIDO' %}
+<span class="badge-pill badge-vermelho"><span class="dot"></span>{{ item.get_resultado_display }}</span>
+{% elif item.pendente %}
+<span class="badge-pill badge-ambar"><span class="dot"></span>PENDENTE</span>
+{% else %}
+—{# importado da planilha sem resultado #}
+{% endif %}

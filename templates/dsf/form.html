@@ -1,25 +1,146 @@
 {% extends 'base.html' %}
-{% block titulo %}Novo DSF - CRAS{% endblock %}
+{% load cras_extras %}
+{% block titulo %}{{ titulo }} - CRAS{% endblock %}
 {% block conteudo %}
 <div class="topo-pagina">
     <div>
-        <h1>Novo DSF Concluído</h1>
+        <h1>{{ titulo }}</h1>
+        <p class="topo-sub">Diagnóstico Sócio Familiar</p>
     </div>
 </div>
-<div class="card" style="max-width:640px">
-    <div class="card-pad">
-        <form method="post">
-            {% csrf_token %}
-            {% for campo in form %}
-            {% include '_campo.html' %}
-            {% endfor %}
-            <div class="form-acoes">
-                <button class="btn btn-primario" type="submit">
-                    <span class="material-symbols-outlined">save</span> Salvar
-                </button>
-                <a class="btn btn-secundario" href="{% url 'dsf:lista' %}">Voltar</a>
+<form method="post" class="ficha" novalidate>
+    {% csrf_token %}
+    {% if form.errors or membros.total_error_count %}
+    <div class="alerta alerta-erro" role="alert"><span class="material-symbols-outlined">error</span> O DSF não foi salvo. Confira os campos destacados.</div>
+    {% endif %}
+    {% for erro in form.non_field_errors %}<div class="alerta alerta-erro">{{ erro }}</div>{% endfor %}
+
+    <h2 class="ficha-parte">1. Solicitação</h2>
+    <section class="card card-pad">
+        <div class="form-row duas">
+            {% include '_campo.html' with campo=form.data %}
+            {% include '_campo.html' with campo=form.beneficio_solicitado %}
+        </div>
+    </section>
+
+    <section class="card card-pad">
+        <h3>I. Identificação</h3>
+        <div class="form-row duas">
+            {% include '_campo.html' with campo=form.nome %}
+            {% include '_campo.html' with campo=form.cpf %}
+            {% include '_campo.html' with campo=form.data_nascimento %}
+            {% include '_campo.html' with campo=form.nome_mae %}
+            {% include '_campo.html' with campo=form.endereco %}
+            {% include '_campo.html' with campo=form.bairro %}
+            {% include '_campo.html' with campo=form.complemento %}
+            {% include '_campo.html' with campo=form.telefone %}
+        </div>
+        {% include '_opcoes.html' with campo=form.estado_civil %}
+    </section>
+
+    <section class="card card-pad">
+        <h3>II. Composição familiar</h3>
+        {% include '_tabela_linhas.html' with formset=membros botao='Adicionar pessoa' icone='person_add' %}
+        <div class="form-row duas">
+            {% include '_campo.html' with campo=form.tempo_uberlandia %}
+            {% include '_campo.html' with campo=form.naturalidade %}
+            {% include '_opcoes.html' with campo=form.morou_outros_lugares %}
+            {% include '_campo.html' with campo=form.outros_lugares %}
+        </div>
+        {% include '_campo.html' with campo=form.motivo_mudanca %}
+    </section>
+
+    <section class="card card-pad">
+        <h3>III. Condição socioeconômica</h3>
+        <div class="form-row">
+            {% include '_campo.html' with campo=form.pensao_alimenticia %}
+            {% include '_campo.html' with campo=form.bpc_loas %}
+            {% include '_campo.html' with campo=form.pensao_inss %}
+            {% include '_campo.html' with campo=form.aposentadoria %}
+            {% include '_campo.html' with campo=form.bolsa_familia_valor %}
+            {% include '_campo.html' with campo=form.outras_fontes %}
+        </div>
+        <div class="form-row duas">
+            {% include '_campo.html' with campo=form.renda_familiar %}
+            {% include '_campo.html' with campo=form.renda_per_capita %}
+        </div>
+        {% include '_campo.html' with campo=form.observacoes %}
+    </section>
+
+    <h2 class="ficha-parte">2. Abordagem domiciliar</h2>
+    <section class="card card-pad">
+        <h3>IV. Condição de habitabilidade</h3>
+        {% include '_opcoes.html' with campo=form.moradia %}
+        <div class="form-row duas">
+            {% include '_campo.html' with campo=form.moradia_valor %}
+            {% include '_campo.html' with campo=form.cedida_por %}
+        </div>
+        {% include '_opcoes.html' with campo=form.tipo_construcao %}
+        {% include '_campo.html' with campo=form.construcao_outros %}
+        {% include '_campo.html' with campo=form.realidade_habitacao %}
+    </section>
+
+    <section class="card card-pad">
+        <h3>VI. Condições de saúde</h3>
+        <div class="form-row duas">
+            {% include '_opcoes.html' with campo=form.tem_deficiencia %}
+            {% include '_campo.html' with campo=form.deficiencia_quem %}
+        </div>
+        <fieldset class="campo campo-grupo">
+            <legend>Qual deficiência?</legend>
+            <div class="opcoes-linha">
+                <label class="opcao-marcar">{{ form.deficiencia_fisica }} <span>Física</span></label>
+                <label class="opcao-marcar">{{ form.deficiencia_mental }} <span>Mental</span></label>
+                <label class="opcao-marcar">{{ form.deficiencia_auditiva }} <span>Auditiva</span></label>
+                <label class="opcao-marcar">{{ form.deficiencia_visual }} <span>Visual</span></label>
+                <label class="opcao-marcar">{{ form.deficiencia_outra }} <span>Outra</span></label>
             </div>
-        </form>
+        </fieldset>
+        {% include '_campo.html' with campo=form.deficiencia_outra_qual %}
+        <div class="form-row">
+            {% include '_opcoes.html' with campo=form.gestante %}
+            {% include '_campo.html' with campo=form.gestante_quem %}
+            {% include '_campo.html' with campo=form.gestante_mes %}
+        </div>
+        <div class="form-row duas">
+            {% include '_opcoes.html' with campo=form.enfermidades %}
+            {% include '_campo.html' with campo=form.enfermidades_quem %}
+            {% include '_opcoes.html' with campo=form.acompanhamento_medico %}
+            {% include '_opcoes.html' with campo=form.gasto_medicamentos %}
+        </div>
+    </section>
+
+    <section class="card card-pad">
+        <h3>VII. Benefícios sociais</h3>
+        <div class="form-row duas">
+            {% include '_opcoes.html' with campo=form.dmae %}
+            {% include '_campo.html' with campo=form.dmae_detalhe %}
+            {% include '_opcoes.html' with campo=form.cemig %}
+            {% include '_campo.html' with campo=form.cemig_detalhe %}
+            {% include '_opcoes.html' with campo=form.beneficio_bolsa_familia %}
+            {% include '_campo.html' with campo=form.beneficio_bolsa_familia_detalhe %}
+        </div>
+    </section>
+
+    <section class="card card-pad">
+        <h3>Abordagens</h3>
+        <div class="form-row duas">
+            {% include '_campo.html' with campo=form.abordagem1_data %}
+            {% include '_campo.html' with campo=form.abordagem1_tecnico %}
+            {% include '_campo.html' with campo=form.abordagem2_data %}
+            {% include '_campo.html' with campo=form.abordagem2_tecnico %}
+        </div>
+    </section>
+
+    <div class="form-acoes">
+        <button class="btn btn-primario" type="submit">
+            <span class="material-symbols-outlined">save</span> Salvar
+        </button>
+        <a class="btn btn-secundario" href="{% url 'dsf:lista' %}">Voltar</a>
     </div>
-</div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static_v 'cras/js/ficha.js' %}"></script>
 {% endblock %}

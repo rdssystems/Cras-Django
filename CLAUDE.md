@@ -61,8 +61,10 @@ Outras formas de rodar:
 | `cras` | — | Projeto: `settings.py`, `urls.py`, Painel (`views.inicio`), gráficos (`graficos.py`), template tags (`templatetags/cras_extras.py`), CSS/JS (`static/cras/`) |
 | `triagem` | `Atendimento` | Triagem, filas, atender e Controle diário. Comandos `importar_planilha` e `demo_triagens` |
 | `atendimentos` | `RegistroAtendimento` | Registro criado automaticamente ao atender; tela só de listagem |
-| `certidoes` | `Certidao` | Lista, cria e edita |
-| `dsf` | `Dsf` | DSF Concluído: lista e cria (sem edição) |
+| `certidoes` | `Certidao` | Solicitação de 2ª via (ficha do cartório) e acompanhamento até a entrega: lista, cria e edita. Ver 4.6 |
+| `dsf` | `Dsf`, `MembroFamiliar` | Menu "DSF": ficha do Diagnóstico Sócio Familiar (cria e edita). Ver 4.6 |
+| `dmae` | `IsencaoDmae`, `MembroDmae`, `EvolucaoDmae` | Menu "Isenção DMAE": Requerimento DMAE (lista, cria e edita). Ver 4.6 |
+| `propao` | `RequerimentoProPao`, `PessoaProPao`, `ProcedimentoProPao` | Menu "PRÓ-PÃO": Requerimento do PRÓ-PÃO (lista, cria e edita). Ver 4.6 |
 | `tap` | `TapDiario` | Grade mensal editável |
 | `administrativo` | `RegistroAdministrativo` | Histórico 2019–2024 importado da planilha; só leitura, com busca e paginação |
 | `usuarios` | `Usuario` | Usuário com `cargo` e gestão de contas em `/usuarios/` |
@@ -72,7 +74,8 @@ Outras formas de rodar:
 
 Pontos do modelo de dados:
 - Todo FK para `Usuario` usa `SET_NULL`: apagar um servidor não apaga histórico.
-- Não existe entidade "Cidadão". Nome e CPF se repetem em cada tabela, sem validação de CPF.
+- Não existe entidade "Cidadão". Nome e CPF se repetem em cada tabela. O CPF só é validado na triagem, no DSF, em Certidões, na Isenção DMAE e no PRÓ-PÃO, com a mesma função (`cras/validadores.py`).
+- Peças comuns às fichas ficam no projeto: `cras/campos.py` (campos de modelo), `cras/escolhas.py` (Sim/Não, estado civil, tipo de solicitação, resultado do deferimento), `cras/formularios.py` (datas, `ReaisField`, CPF, linhas das tabelas), `cras/validadores.py` (CPF e CEP) e `cras/fichas.py` (fluxo de salvar a ficha e totais da lista).
 
 ## 4. Regras de negócio
 
@@ -81,7 +84,7 @@ Pontos do modelo de dados:
   - Tipo de fila: *Atendimento administrativo* ou *Atendimento psicossocial*.
   - Prioridade: sem prioridade, 60+, 80+, PcD, Autista, Gestante ou criança de colo, Libras.
 - **Status combinado:** o banco guarda um só `status`, no vocabulário da planilha (ex.: `AGUARDANDO ATENDIMENTO PSICOSSOCIAL 60+`). A conversão está em `STATUS_DA_FILA` ([triagem/models.py](triagem/models.py)) e é feita no `save()` do [triagem/forms.py](triagem/forms.py).
-- **Resolvido na triagem:** a caixa *Resolvido na própria triagem* grava `ATENDIDO TRIAGEM / ORIENTAÇÃO`, e a pessoa não entra na fila.
+- **Resolvido na triagem:** a caixa *Orientações Realizadas na triagem* grava `ATENDIDO TRIAGEM / ORIENTAÇÃO`, e a pessoa não entra na fila.
 - **Status ao todo:** são 17. Destes, **15 são de fila** (`FILAS` / `STATUS_FILA`) e 2 são finais (`ATENDIDO` e `ATENDIDO TRIAGEM / ORIENTAÇÃO`).
   - `REUNIÃO` continua no modelo só para registros antigos e não é oferecido na triagem.
 - **Senha:** o `numero` é sequencial por dia, com constraint única (`data`, `numero`). Se houver colisão, o `save()` tenta o próximo número (até 5 vezes).
@@ -112,7 +115,7 @@ Pontos do modelo de dados:
 | Psicólogo(a), Assistente Social | ✅ | ✅ |
 | Administrativo | ❌ | ✅ |
 
-- **Visualização e outras telas:** todo usuário logado vê as duas filas e acessa todas as outras telas. **Isso ainda não foi decidido pelo usuário** (seção 12).
+- **Visualização e outras telas:** todo usuário logado vê as duas filas e acessa as outras telas, com duas exceções: a ficha do DSF (só Assistente Social, Psicólogo(a) e administrador, seção 4.6) e o *Histórico Admin.* (só administrador). **O restante ainda não foi decidido pelo usuário** (seção 12).
 
 ### 4.5 Contas de usuário (`/usuarios/`)
 - **Acesso:** só para superusuário (decorator `somente_administrador`). O menu *Administração → Usuários* só aparece para ele.
@@ -123,9 +126,40 @@ Pontos do modelo de dados:
 - **Proteção contra se trancar fora:** o administrador não consegue tirar o próprio acesso nem desativar a própria conta.
 
 ### 4.6 Outros módulos
+- **Quatro formulários (26/11/2026):** o menu *Gestão* tem uma opção para cada página: **DSF** (`/dsf/`), **Certidões** (`/certidoes/`), **Isenção DMAE** (`/isencao-dmae/`) e **PRÓ-PÃO** (`/pro-pao/`). Não há abas dentro das páginas (foram criadas e retiradas no mesmo dia, a pedido).
+  - Cada página vai ter o próprio botão (*Novo DSF*, *Nova Certidão*…), o próprio formulário e a própria lista, e os registros precisarão ser **deferidos depois**. O usuário enviou um documento Word por página: **não inventar campos que não estejam neles**.
+  - Hoje: **as quatro páginas têm a ficha nova** (abaixo). Faltam o deferimento e os PDFs.
+- **Ficha do DSF (26/11/2026)**, cópia do documento Word "Diagnóstico Sócio Familiar – DSF" do CRAS Morumbi:
+  - *Novo DSF* (`/dsf/novo/`) e *Editar* (`/dsf/<pk>/editar/`), em `templates/dsf/form.html`, na ordem do papel: 1. Solicitação; I. Identificação; II. Composição familiar (4 linhas, com adicionar e remover); III. Condição socioeconômica; 2. Abordagem domiciliar: IV. Habitabilidade, VI. Saúde (o documento não tem a seção V), VII. Benefícios sociais e as duas abordagens (data e técnico).
+  - Obrigatórios: **data, benefício e nome**. O resto é preenchido aos poucos, porque a visita domiciliar vem depois da solicitação.
+  - **Quem faz a ficha:** só **Assistente Social** e **Psicólogo(a)**, além do administrador do sistema (`pode_preencher_dsf` em `dsf/models.py`). O Administrativo vê a lista, mas não tem *Novo DSF* nem *Editar*, e as rotas o recusam.
+  - A ficha nasce **PENDENTE** (`resultado` vazio). Só um DSF pendente pode ser editado (`Dsf.pendente`).
+  - **VIII. Parecer não está na ficha**: Deferida/Indeferida, texto do parecer, técnico, CRESS/MG e data serão a etapa de deferimento (a fazer). Depois dela vem o **PDF** no layout do documento (a fazer).
+  - `tecnico_responsavel` é quem criou a ficha; editar não troca.
+  - Valores em reais aceitam `1.412,50`, `1412,5` ou `R$ 600` (`ReaisField`). Renda familiar e per capita são digitadas, sem cálculo automático.
+  - Registros da planilha têm `ficha_preenchida=False`: não contam como pendentes e não abrem a ficha.
 - **DSF:** *Benefício solicitado* é uma escolha entre `Dsf.Beneficio`: Cesta Básica, Fralda e Absorvente.
   - O técnico é a conta de quem cadastrou (`tecnico_responsavel`) ou o nome vindo da planilha (`tecnico_legado`). As telas usam `tecnico_nome`.
+- **Ficha de Certidões (26/11/2026)**, cópia do documento Word "Solicitação de Registro Civil":
+  - *Nova certidão*: 2ª via de **Nascimento, Casamento, Óbito** e **Com averbação** (pelo menos uma marcada), data e cidade do cartório (já vem `UBERLÂNDIA - MG`); registrado(a): nome (`de_quem`), filiação, nascimento, CPF, telefone, endereço, bairro, CadÚnico e NIS; responsável que assina (`quem_solicitou`) e parentesco.
+  - Obrigatórios: tipo, data, nome e nome do responsável.
+  - **Acompanhamento** (recebimento, contato, entrega, observações) aparece só no *Editar*.
+  - Qualquer usuário logado cria e edita (o usuário não definiu cargo para certidões).
+  - Registros da planilha (`ficha_preenchida=False`) podem ter o acompanhamento editado sem marcar o tipo.
+  - Falta: deferimento e PDF. O texto legal, o cabeçalho e as assinaturas são fixos e entram só no PDF. No documento original há "CADSTRADO" e um número de 11 dígitos solto no meio da declaração: **não copiar esses erros para o PDF** (o número não é registrado em lugar nenhum do projeto).
 - **Certidões:** o servidor é a conta (`servidor`) ou o nome vindo da planilha (`servidor_legado`). As telas usam `servidor_nome`. Há também um campo livre de `observacoes`.
+- **Ficha da Isenção DMAE (26/11/2026)**, cópia do documento Word "Requerimento DMAE" (Leis 309 e 315 de 2003):
+  - *Novo Requerimento DMAE* (`/isencao-dmae/novo/`) e *Editar* (`/isencao-dmae/<pk>/editar/`): solicitação (**1ª vez** ou **Renovação**), data e código do imóvel; I. Identificação; II. Composição familiar (2 linhas, com adicionar e remover) e renda familiar digitada; III. Situação habitacional, separada em **tipo** (casa, barraco, apartamento) e **situação** (própria, alugada, financiada, cedido, invasão), e "possui mais de um imóvel?"; IV. Consumo de água de 3 meses (`MM/AAAA` e m³); V. Evolução (data e procedimento, quantas linhas quiser); VI. Parecer social.
+  - Obrigatórios: tipo de solicitação, data e nome. Na evolução, uma linha começada exige data e procedimento.
+  - O **consumo médio é calculado** (`IsencaoDmae.consumo_medio`): média dos meses preenchidos, com 1 casa decimal. Não é gravado.
+  - Nasce **PENDENTE** (`resultado` vazio) e só pode ser editado enquanto pendente. `servidor` é quem criou.
+  - Qualquer usuário logado cria e edita, inclusive o parecer social (o usuário não definiu cargo).
+  - Falta: deferimento e PDF (cabeçalho, leis e assinaturas entram só no PDF). Ao fazer o deferimento, decidir se a evolução continua aberta depois dele.
+- **Ficha do PRÓ-PÃO (26/11/2026)**, cópia do documento Word "Requerimento do PRÓ-PÃO":
+  - *Novo Requerimento PRÓ-PÃO* (`/pro-pao/novo/`) e *Editar* (`/pro-pao/<pk>/editar/`): tipo (**1ª vez** ou **Renovação**) e data; I. Identificação (com data de nascimento, número, complemento, CEP, documento de identidade e SSP/UF); II. Composição familiar (4 linhas na tela, o papel tem 8); III. Renda familiar; IV. Situação habitacional (própria, cedida, alugada, financiada ou ocupação, com valor e detalhe da ocupação); V. Análise do sistema (2º imóvel, em nome de titular e/ou cônjuge, endereço, sistema e data); Procedimentos (data e texto, quantas linhas quiser).
+  - Obrigatórios: tipo, data e nome. **Titular/Cônjuge** só podem ser marcados com "Possui 2º imóvel". O CEP é gravado como `00000-000`.
+  - Nasce **PENDENTE** e só pode ser editado enquanto pendente. `servidor` é quem criou. Qualquer usuário logado preenche tudo, inclusive a seção V.
+  - Falta: deferimento e PDF (cabeçalho, declaração de veracidade e assinaturas entram só no PDF).
 - **Indicador "Atendidos" do Painel:** conta só `ATENDIDO`, sem os resolvidos na triagem. É uma decisão de negócio em aberto (B9 no MAPA).
 
 ## 5. Painel e gráficos
@@ -153,6 +187,11 @@ Pontos do modelo de dados:
   - Não há modo escuro.
 - **CSS e JS próprios sempre com `{% static_v 'caminho' %}`** (`cras_extras`), que acrescenta `?v=<mtime>`. Sem isso, o navegador usa o arquivo velho do cache e a página aparece quebrada (aconteceu em 23/11/2026).
 - **Campos de formulário:** use `{% include '_campo.html' with campo=form.x %}`, que mostra rótulo, asterisco de obrigatório e erros, e também trata checkbox. Os forms com `novalidate` mostram os erros do Django.
+- **Escolha única em botões:** `{% include '_opcoes.html' with campo=form.x %}` (radio). Fichas longas usam a classe `ficha`.
+- **Linhas que entram e saem** (composição familiar, evolução): `{% include '_tabela_linhas.html' with formset=... botao='...' icone='...' %}` com o script `cras/js/ficha.js`, que também limpa o campo de CPF. O formset precisa de `can_delete=True` e prefixo próprio.
+- **Ficha nova com tabelas:** a view usa `tela_de_ficha()` e `contar_situacoes()` (`cras/fichas.py`); as linhas usam `LinhaForm` ou `LinhaDePessoaForm` e `formset_de_linhas()`. Não copie esse fluxo para dentro do app.
+- **Lista com deferimento:** `_cartoes_de_situacao.html` (pendentes, deferidos, indeferidos) e `_situacao.html` (etiqueta; o objeto precisa de `resultado` e `pendente`).
+- **Datas:** sempre com `campo_de_data()` de `cras/formularios.py`; sem o formato ISO, o `<input type="date">` abre vazio na edição.
 - **Componentes existentes:**
   - estrutura: `card`, `card-pad`, `topo-pagina`, `titulo-secao`, `form-row`;
   - botões: `btn btn-primario` / `btn-secundario` / `btn-verde` / `btn-sm`;
@@ -201,6 +240,7 @@ Pontos do modelo de dados:
   - O Tailscale roda no container `tailscale`, com rede do host.
   - Para ver a configuração: `docker exec tailscale tailscale funnel status`.
 - **Atualizar:** `cd /DATA/AppData/Cras-django && git pull && sudo docker compose -f compose.prod.yaml up -d --build`.
+- **Versão no ar (27/11/2026):** motivos novos e os quatro formulários (migrações `atendimentos/0005`, `certidoes/0004`, `dsf/0005`, `dmae/0001` e `propao/0001`). Cópias manuais do banco ficam em `dados/` (`backup-antes-*.sqlite3`).
 - **Logs:** `sudo docker logs -f cras-app`.
 - **Verificar de fora sem SSH:** `nslookup servidor-test.taile3dafe.ts.net 1.1.1.1` e `curl --resolve servidor-test.taile3dafe.ts.net:10000:<IP público do relay> https://servidor-test.taile3dafe.ts.net:10000/login/`.
 
@@ -229,7 +269,7 @@ Pontos do modelo de dados:
 
 ## 9. Testes
 
-`.venv/Scripts/python manage.py test` → **56 testes, 55 passando** (26/11/2026).
+`.venv/Scripts/python manage.py test` → **104 testes, 103 passando** (26/11/2026).
 
 A falha é `test_sao_duas_filas_administrativa_e_psicossocial`: o commit `c1c2cae` (24/11) tirou do Painel os cards das duas filas, e o teste ainda os procura. Falta o usuário decidir entre ajustar o teste e devolver as filas ao Painel (seção 12).
 
@@ -238,10 +278,13 @@ A falha é `test_sao_duas_filas_administrativa_e_psicossocial`: o commit `c1c2ca
 | [triagem/tests.py](triagem/tests.py) | Filas, ordem de chamada, atender (corrida entre servidores), numeração, importador, triagem com fila + prioridade, motivos múltiplos e demonstração |
 | [cras/tests.py](cras/tests.py) | Gráficos do Painel e `static_v` |
 | [usuarios/tests.py](usuarios/tests.py) | Contas e cargos |
-| [dsf/tests.py](dsf/tests.py) | Benefício do DSF |
+| [dsf/tests.py](dsf/tests.py) | Ficha do DSF (criar, editar, pendente, valores, composição familiar, permissão) e menu Gestão |
+| [certidoes/tests.py](certidoes/tests.py) | Ficha da certidão, edição e datas na tela |
+| [dmae/tests.py](dmae/tests.py) | Requerimento DMAE: criar, editar, consumo médio, mês/ano, evolução e deferido sem edição |
+| [propao/tests.py](propao/tests.py) | Requerimento do PRÓ-PÃO: criar, editar, CEP, 2º imóvel, procedimentos e deferido sem edição |
 | [tap/tests.py](tap/tests.py) | TAP |
 
-Certidões, administrativo e a lista de atendimentos ainda não têm testes. Toda mudança de regra deve vir com teste.
+Administrativo e a lista de atendimentos ainda não têm testes. Toda mudança de regra deve vir com teste.
 
 ## 10. Ambiente (Windows) — gotchas
 
@@ -273,6 +316,16 @@ Certidões, administrativo e a lista de atendimentos ainda não têm testes. Tod
 | 26/11/2026 | Deploy na VPS com **banco vazio** e acesso **público pelo Funnel (porta 10000)**; ajustes de produção commitados no GitHub (seção 7.1). |
 | 26/11/2026 | O banco local é antigo. A planilha atual do CRAS Morumbi foi importada direto na VPS, com o importador ampliado para Certidões e DSF. Multiunidade (ex.: "CRAS Morumbi") ficou para depois. |
 | 26/11/2026 | Commit e push liberados de forma permanente: o agente commita, envia e atualiza a VPS sem pedir. |
+| 26/11/2026 | Novos motivos no *Atender* e "Cesta básica" renomeada para "Solicitação de cesta básica". **Só no localhost** até o usuário mandar subir (pendência 2.1). |
+| 26/11/2026 | Na triagem, a caixa passa a se chamar "Orientações Realizadas na triagem (não entra na fila)". No menu, "DSF Concluído" vira "DSF", sem o botão *Novo DSF*, com 4 abas (DSF, Certidões, Isenção DMAE e PRÓ-PÃO), cada uma com formulário próprio a enviar (seção 4.6). Por enquanto só no localhost (pendência 2.1). |
+| 26/11/2026 | Ficha completa do DSF a partir do documento Word do CRAS, com lista e situação Pendente. Deferimento e PDF ficam para depois. A divisão (parecer fora da ficha, obrigatórios, quem pode editar) foi escolha do agente; confirmar se o usuário questionar. Só no localhost. |
+| 26/11/2026 | A ficha do DSF é feita por Assistente Social ou Psicólogo(a). O acesso do administrador do sistema foi mantido pelo agente, como no *Atender*. Logos ficam para mais adiante. |
+| 26/11/2026 | Abas dentro do DSF retiradas: DSF, Certidões, Isenção DMAE e PRÓ-PÃO viram opções do menu *Gestão*. |
+| 26/11/2026 | Ficha nova de Certidões a partir do documento Word. Escolhas do agente: tipos como caixas de marcar, acompanhamento só na edição, sem restrição de cargo. Só no localhost. |
+| 26/11/2026 | Ficha da Isenção DMAE a partir do documento Word, com a Evolução em linhas adicionáveis (sugestão do usuário). Escolhas do agente: app próprio `dmae`, situação habitacional em dois grupos, consumo médio calculado, parecer social dentro da ficha, sem restrição de cargo. Só no localhost. |
+| 26/11/2026 | Ficha do PRÓ-PÃO a partir do documento Word, último dos quatro formulários. Escolhas do agente: app próprio `propao`, 4 linhas iniciais na composição familiar, tabela final chamada "Procedimentos", seção V sempre visível e sem restrição de cargo. Só no localhost. |
+| 27/11/2026 | O usuário autorizou subir só a correção das datas de certidão (commit `9e96669`); VPS atualizada no mesmo dia. Conferidas as 490 certidões contra a planilha: nenhuma data perdida. O restante continua apenas no localhost. |
+| 27/11/2026 | O usuário mandou publicar o que estava só no localhost: motivos novos, rótulo da triagem, menu *Gestão* e os quatro formulários. Os "só no localhost" acima são anteriores a esta publicação. |
 
 ## 12. Pendências (próximos passos)
 
@@ -280,11 +333,9 @@ Certidões, administrativo e a lista de atendimentos ainda não têm testes. Tod
    - Psicólogo(a) e Assistente Social continuam atendendo a fila administrativa.
    - O Administrativo continua vendo os nomes da fila psicossocial.
    - "Atendimento psicossocial" só pode ser registrado por Psicólogo(a) ou Assistente Social.
-   - Falta definir quem acessa Certidões, DSF, TAP e Histórico (que tem CPF).
+   - Já definido: a ficha do DSF é de Assistente Social e Psicólogo(a); o Histórico (que tem CPF) é só do administrador. Falta definir quem acessa Certidões, TAP, a lista do DSF e as próximas abas.
 2. **Teste das filas no Painel:** ajustar o teste ou devolver as filas ao Painel (seção 9).
-2.1. **Lista oficial de motivos desatualizada:** `RegistroAtendimento.MOTIVOS` (o que o *Atender* oferece) veio da planilha de 2024.
-   - A planilha atual usa outros motivos: Atualização de cadastro, Orientações triagem, Cadastro novo, Atendimento descumprimento de condicionalidade, Orientações BPC, Entrevista domiciliar, Orientações psicossocial, Carteirinha do idoso, Pró-Pão, Visita domiciliar, Solicitação de cesta básica, entre outros.
-   - Falta o usuário confirmar a lista nova.
+2.1. **DSF, Certidões, Isenção DMAE e PRÓ-PÃO:** faltam o **deferimento** (quem pode deferir ainda não foi decidido) e os **PDFs** das fichas (os logos ficam para mais adiante, segundo o usuário). Falta confirmar se o Administrativo pode ver a lista do DSF, quem faz Certidões, Isenção DMAE e PRÓ-PÃO, quem escreve o parecer social (DMAE) e quem preenche a análise do sistema (PRÓ-PÃO).
 2.2. **TAP 2026:** a planilha importada não tinha nenhum valor diário, só a linha TOTAL zerada.
 3. **Backup do banco da VPS:** ainda não existe rotina. O Naicas tem uma (`backups/`, `instalar_auto_update.sh`), que pode servir de modelo.
 4. **Paginação em `/atendimentos/`** (B6): com 675 registros a página tem 61 mil px e leva 1,6 s.

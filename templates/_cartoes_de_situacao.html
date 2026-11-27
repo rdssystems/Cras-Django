@@ -1,0 +1,35 @@
+<div class="grid-metricas" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+    <div class="metrica" style="--tonal: #fdf3d4">
+        <div class="metrica-topo">
+            <div>
+                <div class="metrica-rotulo" style="color:#765800">Pendentes</div>
+                <div class="metrica-valor" style="color:#765800">{{ pendentes }}</div>
+            </div>
+            <div class="metrica-icone" style="background:#fdf3d4;color:#765800">
+                <span class="material-symbols-outlined">hourglass_top</span>
+            </div>
+        </div>
+    </div>
+    <div class="metrica" style="--tonal: #e4f1e8">
+        <div class="metrica-topo">
+            <div>
+                <div class="metrica-rotulo" style="color:#2e7a4c">Deferidos</div>
+                <div class="metrica-valor" style="color:#2e7a4c">{{ deferidos }}</div>
+            </div>
+            <div class="metrica-icone" style="background:#e4f1e8;color:#2e7a4c">
+                <span class="material-symbols-outlined">thumb_up</span>
+            </div>
+        </div>
+    </div>
+    <div class="metrica" style="--tonal: #fbe9e3">
+        <div class="metrica-topo">
+            <div>
+                <div class="metrica-rotulo" style="color:#a53212">Indeferidos</div>
+                <div class="metrica-valor" style="color:#a53212">{{ indeferidos }}</div>
+            </div>
+            <div class="metrica-icone" style="background:#fbe9e3;color:#a53212">
+                <span class="material-symbols-outlined">thumb_down</span>
+            </div>
+        </div>
+    </div>
+</div>

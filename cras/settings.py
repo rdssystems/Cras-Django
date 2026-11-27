@@ -67,6 +67,8 @@ INSTALLED_APPS = [
     'atendimentos',
     'certidoes',
     'dsf',
+    'dmae',
+    'propao',
     'tap',
     'administrativo',
 ]
